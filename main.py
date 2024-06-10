@@ -8,8 +8,7 @@ from chat_utils import generate_rag_response
 from file_utils import generate_document
 from retriever import get_retriever_from_documents
 
-load_dotenv(override=True)
-
+load_dotenv()
 
 def main():
     st.title("Infi Book AI")

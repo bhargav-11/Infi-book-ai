@@ -10,7 +10,7 @@ from constants import short_book_generator_prompt, short_book_prompt
 
 openai_api_key = os.environ.get("OPENAI_API_KEY")
 
-langchain_openai_client = ChatOpenAI(api_key=openai_api_key,
+langchain_openai_client = ChatOpenAI(openai_api_key=openai_api_key,
                                      model="gpt-4o",
                                      verbose=True)
 

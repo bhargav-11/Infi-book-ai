@@ -5,7 +5,6 @@ from langchain_community.vectorstores import Chroma
 from langchain_openai import OpenAIEmbeddings
 
 api_key =  os.getenv("OPENAI_API_KEY")
-print("OpenAI API key",api_key)
 
 def get_retriever_from_documents(documents, top_k=4):
     """ 
@@ -19,7 +18,7 @@ def get_retriever_from_documents(documents, top_k=4):
         retriever (Retriever): The retriever.
     """
     print("Retriever is being invoked")
-    text_splitter = CharacterTextSplitter(chunk_size=350, chunk_overlap=30)
+    text_splitter = CharacterTextSplitter(chunk_size=1000)
     texts = text_splitter.create_documents(documents)
     embeddings = OpenAIEmbeddings(api_key=api_key)
 
