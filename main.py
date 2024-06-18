@@ -1,15 +1,12 @@
-import os
-
 import streamlit as st
 from dotenv import load_dotenv
 from pdfminer.high_level import extract_text
 
 from chat_utils import generate_rag_response
 from file_utils import generate_document
-from retriever import get_retriever_from_documents
+from query_engine import get_query_engine_from_text
 
-load_dotenv(override=True)
-
+load_dotenv()
 
 def main():
     st.title("Infi Book AI")
@@ -18,13 +15,14 @@ def main():
                                       type=["pdf"],
                                       key="general_agent")
 
-    if uploaded_files and "retriever" not in st.session_state:
+    if uploaded_files:
+        print("Inside uploaded files")
         for uploaded_file in uploaded_files:
             text = extract_text(uploaded_file)
-            retriever = get_retriever_from_documents(text, top_k=7)
+            query_engine = get_query_engine_from_text(text, top_k=7)
 
-            if "retriever" not in st.session_state:
-                st.session_state.retriever = retriever
+            if "query_engine" not in st.session_state:
+                st.session_state.query_engine = query_engine
 
     text_area = st.text_area("Provide sub chapters seperated by | ")
     textsplit = ""

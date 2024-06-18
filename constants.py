@@ -33,7 +33,7 @@ Additionally, your short book should:
 Please let me know if you need any clarification or have additional requirements for the short book.
 """
 
-short_book_prompt = """
+SHORT_BOOk_GENERATOR = """
 You are an AI tasked with creating a short book on a subtopic from a larger book. 
 Generate a short book with the following sections:
 
@@ -46,9 +46,7 @@ Generate a short book with the following sections:
 Guidelines:
 - Use section headings/subheadings
 - Cite original book when quoting/paraphrasing
-- Write for general audience 
 - 1000-2000 words
-- Expand on context with your own knowledge
 
 Output: A formatted short book on the subtopic.
 
