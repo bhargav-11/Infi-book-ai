@@ -6,6 +6,7 @@ from llama_index.llms.openai import OpenAI
 from openai import AsyncOpenAI
 
 from constants import SHORT_BOOk_GENERATOR
+from file_utils import generate_document
 
 openai_api_key = os.environ.get("OPENAI_API_KEY")
 
@@ -40,7 +41,7 @@ def chat(prompt):
     return response.text
 
 
-async def streamchat(placeholder,query):
+async def streamchat(placeholder,query,index):
     if "query_engine" not in st.session_state:
         return "Sorry no document found"
 
@@ -59,9 +60,15 @@ async def streamchat(placeholder,query):
         stream=True
     )
     stream = await stream_coroutine
-    streamed_text = "# "
+    streamed_text = " "
     async for chunk in stream:
         chunk_content = chunk.choices[0].delta.content
         if chunk_content is not None:
             streamed_text = streamed_text + chunk_content
             placeholder.info(streamed_text)
+
+    download_link = generate_document(streamed_text, index)
+    placeholder.markdown(
+        f'<div style="background-color: rgba(61, 157, 243, 0.2); padding: 10px; border-radius: 5px; color: rgb(199, 235, 255);">{streamed_text}<br>{download_link}</div>',
+        unsafe_allow_html=True
+    )
