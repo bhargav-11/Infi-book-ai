@@ -8,6 +8,9 @@ from llama_index.core.node_parser import TokenTextSplitter
 from custom_query_engine import RAGStringQueryEngine
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.embeddings.openai import OpenAIEmbedding
+from dotenv import load_dotenv
+
+load_dotenv()
 
 chroma_client = chromadb.EphemeralClient()
 chroma_collection = chroma_client.create_collection("chatbot-3")

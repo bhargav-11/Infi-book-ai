@@ -4,10 +4,13 @@ import asyncio
 import streamlit as st
 from llama_index.llms.openai import OpenAI
 from openai import AsyncOpenAI
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from constants import SHORT_BOOk_GENERATOR
 
-openai_api_key = os.environ.get("OPENAI_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 llm = OpenAI(api_key=openai_api_key, model="gpt-4o")
 llm_async = AsyncOpenAI(api_key=openai_api_key)
