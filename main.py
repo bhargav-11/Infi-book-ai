@@ -5,12 +5,22 @@ sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 import streamlit as st
 from dotenv import load_dotenv
 
+st.set_page_config(layout="wide")
+
 import asyncio
 from chat_utils import streamchat
 from file_uploader import upload_files
 
+dark = '''
+<style>
+    .stApp {
+    background-color: black;
+    }
+</style>
+'''
+st.markdown(dark, unsafe_allow_html=True)
+
 load_dotenv()
-st.set_page_config(layout="wide")
 
 async def main():
     st.title("Infi Book AI")
