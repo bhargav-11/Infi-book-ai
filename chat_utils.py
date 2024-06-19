@@ -72,6 +72,6 @@ async def streamchat(placeholder,query,index):
 
     download_link = generate_document(streamed_text, index)
     placeholder.markdown(
-        f'<div style="background-color: rgba(61, 157, 243, 0.2); padding: 10px; border-radius: 5px; color: rgb(199, 235, 255);">{streamed_text}<br>{download_link}</div>',
+        f'{streamed_text}<div style="background-color: rgba(61, 157, 243, 0.2); padding: 10px; border-radius: 5px; color: rgb(199, 235, 255);"><br>{download_link}</div>',
         unsafe_allow_html=True
     )

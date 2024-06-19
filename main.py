@@ -11,15 +11,6 @@ import asyncio
 from chat_utils import streamchat
 from file_uploader import upload_files
 
-dark = '''
-<style>
-    .stApp {
-    background-color: black;
-    }
-</style>
-'''
-st.markdown(dark, unsafe_allow_html=True)
-
 load_dotenv()
 
 async def main():
