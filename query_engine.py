@@ -27,13 +27,13 @@ def get_query_engine_from_text(text, top_k=4):
     """
     current_time = time.time()
     print("Retriever is being invoked")
-    text_splitter = TokenTextSplitter(chunk_size=500)
+    text_splitter = TokenTextSplitter(chunk_size=600)
     chunks=text_splitter.split_text(text)
     documents = generate_documents_from_chunks(chunks)
     
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
-    embeddings = OpenAIEmbedding(api_key=api_key,show_progress_bar=True,embed_batch_size=64)
+    embeddings = OpenAIEmbedding(api_key=api_key,show_progress_bar=True,embed_batch_size=100)
     service_context = ServiceContext.from_defaults(embed_model=embeddings)
     
     index = VectorStoreIndex.from_documents(

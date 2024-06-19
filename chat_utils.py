@@ -1,6 +1,5 @@
 import os
 
-import asyncio
 import streamlit as st
 from llama_index.llms.openai import OpenAI
 from openai import AsyncOpenAI
@@ -31,8 +30,7 @@ def generate_rag_response(query):
     prompt = SHORT_BOOk_GENERATOR.format(
         subtopic_summary=query,context=context_str
     )
-
-    response = chat(prompt)
+    response=chat(prompt)
     return response
 
 
