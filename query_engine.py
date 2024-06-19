@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 chroma_client = chromadb.EphemeralClient()
-chroma_collection = chroma_client.create_collection("chatbot-3")
+chroma_collection = chroma_client.get_or_create_collection("chatbot-3")
 
 api_key =  os.getenv("OPENAI_API_KEY")
 
