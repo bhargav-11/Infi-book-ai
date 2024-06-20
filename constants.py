@@ -58,6 +58,17 @@ Output:
 
 """
 
+BOOK_GENERATOR = """
+Create a concise book on the given subtopic from a larger work.
+Structure the content appropriately, including relevant sections. Cite the original source when quoting or paraphrasing.
+Input:
+
+Subtopic : {subtopic_summary}
+Context from Book: {context}
+
+Output:
+"""
+
 # Performance Requirements: The requirements cover various aspects like color rendering, illumination, spatial frequency response, resolution, mechanical interface, safety measures, and noise levels.
 # |
 # Functional Requirements: The system should have functions like brightness, gamma, sharpness, color adjustment, white balance, screen freeze, image magnification, endoscopic mode switching, language selection, shortcut buttons, video/photo capture, data storage, reset, and soft lens interface.

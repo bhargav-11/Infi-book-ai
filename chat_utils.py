@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from constants import SHORT_BOOk_GENERATOR
+from constants import BOOK_GENERATOR
 from file_utils import generate_document
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -30,7 +30,7 @@ def generate_rag_response(query):
 
     chunks = st.session_state.query_engine.query(query)
     context_str = "\n\n".join(chunk.get("content") for chunk in chunks)
-    prompt = SHORT_BOOk_GENERATOR.format(
+    prompt = BOOK_GENERATOR.format(
         subtopic_summary=query,context=context_str
     )
     response=chat(prompt)
@@ -49,7 +49,7 @@ async def streamchat(placeholder,query,index):
     chunks = st.session_state.query_engine.query(query)
 
     context_str = "\n\n".join(chunk.get("content") for chunk in chunks)
-    prompt = SHORT_BOOk_GENERATOR.format(
+    prompt = BOOK_GENERATOR.format(
         subtopic_summary=query,context=context_str
     )
     stream_coroutine  = llm_async.chat.completions.create(
