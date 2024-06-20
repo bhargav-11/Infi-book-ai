@@ -61,3 +61,15 @@ def generate_documents_from_chunks(chunks):
     
     return documents
 
+
+def get_all_ids():
+    all_ids = chroma_collection.get()['ids']
+    print("All ids :",len(all_ids))
+    return all_ids
+
+def reset_collection():
+    all_ids = chroma_collection.get()['ids']
+    if all_ids:
+        chroma_collection.delete(ids=all_ids)
+    print(f"Cleared {len(all_ids)} documents from the collection.")
+

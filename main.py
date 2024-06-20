@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import asyncio
 from chat_utils import streamchat
 from pdfminer.high_level import extract_text
-from query_engine import get_query_engine_from_text
+from query_engine import get_all_ids, get_query_engine_from_text, reset_collection
 
 load_dotenv()
 
@@ -19,6 +19,9 @@ async def main():
     textsplit = ""
     if text_area is not None:
         textsplit = text_area.split("|")
+
+    if st.button("Clear memory"):
+        reset_collection()
 
     if st.button('Generate documents'):
         if uploaded_files:
