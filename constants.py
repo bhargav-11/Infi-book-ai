@@ -59,12 +59,10 @@ Output:
 """
 
 BOOK_GENERATOR = """
-Create a concise book on the given subtopic from a larger work.
-Structure the content appropriately, including relevant sections. Cite the original source when quoting or paraphrasing.
-Input:
+Support the prompt using provided context.
 
-Subtopic : {subtopic_summary}
-Context from Book: {context}
+Prompt : {subtopic_summary}
+Context: {context}
 
 Output:
 """
