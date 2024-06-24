@@ -53,12 +53,13 @@ async def streamchat(placeholder,query,index):
         query=query,context=context_str
     )
     stream_coroutine  = llm_async.chat.completions.create(
-        model="gpt-4-turbo",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt},
         ],
-        stream=True
+        stream=True,
+        temperature=0.4,
     )
     stream = await stream_coroutine
     streamed_text = " "
