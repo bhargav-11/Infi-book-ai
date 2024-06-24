@@ -59,12 +59,13 @@ Output:
 """
 
 BOOK_GENERATOR = """
-Support the prompt using provided context.
+You are a world-leading expert in the field or domain discussed in the query. Provide a detailed, technical, and contextually relevant response to the following query using provided context.
+Your responses should be accurate, robust, and include any necessary technical details and explanations.
 
-Prompt : {subtopic_summary}
+query : {query}
 Context: {context}
 
-Output:
+Response:
 """
 
 # Performance Requirements: The requirements cover various aspects like color rendering, illumination, spatial frequency response, resolution, mechanical interface, safety measures, and noise levels.
