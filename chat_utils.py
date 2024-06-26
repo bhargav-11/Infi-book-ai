@@ -71,16 +71,47 @@ async def streamchat(placeholder,query,index):
 
     download_link = generate_document(streamed_text, index)
 
-    # Without index
-    # placeholder.markdown(
-    # f'<div style="background-color: rgba(61, 157, 243, 0.2); padding: 10px; border-radius: 5px; color: rgb(199, 235, 255);">{streamed_text}<br><br>{download_link}</div>',
-    # unsafe_allow_html=True
-    # )
+    st.markdown("""
+        <style>
+        .chat-container {
+            background-color: rgba(61, 157, 243, 0.2);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .chat-index {
+            font-size: 0.8em;
+            opacity: 0.7;
+            margin-bottom: 10px;
+        }
+        .chat-content {
+            margin-top: 5px;
+        }
+        /* Theme-specific styles */
+        @media (prefers-color-scheme: dark) {
+            .chat-container {
+                background-color: rgba(61, 157, 243, 0.3);  /* Slightly more opaque for better visibility */
+            }
+            .chat-index {
+                color: rgba(255, 255, 255, 0.7);
+            }
+        }
+        @media (prefers-color-scheme: light) {
+            .chat-container {
+                background-color: rgba(61, 157, 243, 0.2);
+            }
+            .chat-index {
+                color: rgba(0, 0, 0, 0.7);
+            }
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
     placeholder.markdown(
         f'''
-        <div style="background-color: rgba(61, 157, 243, 0.2); padding: 10px; border-radius: 5px; color: rgb(199, 235, 255); margin-bottom: 20px;">
-            <div style="font-size: 0.8em; color: rgba(199, 235, 255, 0.7); margin-bottom: 10px;">#{index}</div>
-            <div style="margin-top: 5px;">
+        <div class="chat-container">
+            <div class="chat-index">#{index}</div>
+            <div class="chat-content">
                 {streamed_text}
                 <br><br>
                 {download_link}
