@@ -41,7 +41,7 @@ async def main():
             for uploaded_file in uploaded_files:
                 all_text += extract_text(uploaded_file) + "\n\n"
 
-            query_engine = get_query_engine_from_text(all_text, top_k=7)
+            query_engine = get_query_engine_from_text(all_text, top_k=12)
             st.session_state.query_engine = query_engine
         
         main_content.write("Generating documents...")

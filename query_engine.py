@@ -17,7 +17,7 @@ chroma_collection = chroma_client.get_or_create_collection("chatbot-3")
 
 api_key =  os.getenv("OPENAI_API_KEY")
 
-def get_query_engine_from_text(text, top_k=4):
+def get_query_engine_from_text(text, top_k=12):
     """ 
     Generate retriever from text
 
@@ -30,7 +30,7 @@ def get_query_engine_from_text(text, top_k=4):
     """
     current_time = time.time()
     print("Retriever is being invoked")
-    text_splitter = TokenTextSplitter(chunk_size=600)
+    text_splitter = TokenTextSplitter(chunk_size=400)
     chunks=text_splitter.split_text(text)
     documents = generate_documents_from_chunks(chunks)
     
