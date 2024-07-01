@@ -23,12 +23,14 @@ def generate_document(text, idx):
   file_bytes = BytesIO()
   doc.save(file_bytes)
   file_bytes.seek(0)
+  
+  text_bytes = file_bytes.read()
 
   # Create a download link for the Word document
   download_link = create_download_link(file_bytes.read(),
                                        f"generated_document_{idx}.docx")
 
-  return download_link
+  return download_link,text_bytes
 
 
 def create_download_link(val, filename):
