@@ -19,8 +19,8 @@ async def main():
     if 'all_documents' not in st.session_state:
         st.session_state.all_documents = {}
 
-    if 'documents_ready' not in st.session_state:
-        st.session_state.documents_ready = False
+    if "generated_responses" not in st.session_state:
+        st.session_state.generated_responses = {}
 
     st.title("Infi Book AI")
 
@@ -37,6 +37,7 @@ async def main():
         
         if st.button("Clear memory"):
             st.session_state.all_documents = {}
+            st.session_state.generated_responses ={}
             st.session_state.documents_ready = False
             reset_collection()
         
@@ -49,7 +50,9 @@ async def main():
 
     if generate_button:
         if uploaded_files:
+            reset_collection()
             st.session_state.all_documents = {}
+            st.session_state.generated_responses ={}
             all_text = ""
             for uploaded_file in uploaded_files:
                 all_text += extract_text(uploaded_file) + "\n\n"
@@ -104,8 +107,6 @@ def create_zip_file():
     zip_buffer.seek(0)
     return zip_buffer
 
-def update_documents_ready():
-    st.session_state.documents_ready = bool(st.session_state.all_documents)
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 chroma_client = chromadb.EphemeralClient()
-chroma_collection = chroma_client.get_or_create_collection("chatbot-3")
+chroma_collection = chroma_client.get_or_create_collection("chatbot-4")
 
 api_key =  os.getenv("OPENAI_API_KEY")
 
@@ -72,7 +72,13 @@ def get_all_ids():
 
 def reset_collection():
     all_ids = chroma_collection.get()['ids']
-    if all_ids:
-        chroma_collection.delete(ids=all_ids)
-    print(f"Cleared {len(all_ids)} documents from the collection.")
+    total_ids = len(all_ids)
+    batch_size = 100
+    
+    for i in range(0, total_ids, batch_size):
+        batch = all_ids[i:i+batch_size]
+        chroma_collection.delete(ids=batch)
+        print(f"Deleted batch {i//batch_size + 1}: {len(batch)} documents")
+    
+    print(f"Cleared {total_ids} documents from the collection.")
 

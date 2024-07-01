@@ -1,5 +1,5 @@
 import os
-
+import re
 import streamlit as st
 from llama_index.llms.openai import OpenAI
 from openai import AsyncOpenAI
@@ -70,7 +70,9 @@ async def streamchat(placeholder,query,index):
             placeholder.info(streamed_text)
 
     download_link,doc_bytes = generate_document(streamed_text, index)
-    st.session_state.all_documents[f"generated_document_{index}.docx"] = doc_bytes
+    title = extract_title(streamed_text)
+    document_name = f"{title}.docx" if title else f"generated_document_{index}.docx"
+    st.session_state.all_documents[document_name] = doc_bytes
     placeholder.markdown(
         f'''
         <div style="background-color: rgba(61, 157, 243, 0.2); padding: 10px; border-radius: 5px; color: rgb(199, 235, 255); margin-bottom: 20px;">
@@ -84,3 +86,18 @@ async def streamchat(placeholder,query,index):
         ''',
         unsafe_allow_html=True
     )
+
+
+def extract_title(text):
+    # Try to find a line starting with ## or #
+    match = re.search(r'^\s*(##?\s*)(.+)$', text, re.MULTILINE)
+    if match:
+        return match.group(2).strip()
+    
+    # If no match found, try to find the first non-empty line
+    lines = text.split('\n')
+    for line in lines:
+        if line.strip():
+            return line.strip()
+    
+    return None
