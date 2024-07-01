@@ -6,15 +6,15 @@ import markdown
 from htmldocx import HtmlToDocx
 
 
-def generate_document(text, idx):
+def generate_document(text, idx,title):
   # Convert the Markdown content to HTML
   html = markdown.markdown(text)
 
   # Create a new Word document
   doc = docx.Document()
-
+  
   # Add the HTML content to the document
-  doc.add_heading(f"Document {idx}", 0)
+  doc.add_heading(f"{title}", 0)
 
   html_to_docx_parser = HtmlToDocx()
   html_to_docx_parser.add_html_to_document(html, doc)
