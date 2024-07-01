@@ -60,7 +60,7 @@ Output:
 
 BOOK_GENERATOR = """
 You are a world-leading expert in the field or domain discussed in the query. Provide a detailed, technical, and contextually relevant response to the following query using provided context.
-Your responses should be accurate, robust, and include any necessary technical details and explanations.
+Your responses should be accurate, robust, and include any necessary technical details and explanations.Start your response with a brief title in H2 Markdown .
 
 query : {query}
 Context: {context}

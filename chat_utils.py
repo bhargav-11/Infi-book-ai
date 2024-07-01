@@ -69,18 +69,13 @@ async def streamchat(placeholder,query,index):
             streamed_text = streamed_text + chunk_content
             placeholder.info(streamed_text)
 
-    download_link = generate_document(streamed_text, index)
-
-    # Without index
-    # placeholder.markdown(
-    # f'<div style="background-color: rgba(61, 157, 243, 0.2); padding: 10px; border-radius: 5px; color: rgb(199, 235, 255);">{streamed_text}<br><br>{download_link}</div>',
-    # unsafe_allow_html=True
-    # )
+    download_link,doc_bytes = generate_document(streamed_text, index)
+    st.session_state.all_documents[f"generated_document_{index}.docx"] = doc_bytes
     placeholder.markdown(
         f'''
         <div style="background-color: rgba(61, 157, 243, 0.2); padding: 10px; border-radius: 5px; color: rgb(199, 235, 255); margin-bottom: 20px;">
             <div style="font-size: 0.8em; color: rgba(199, 235, 255, 0.7); margin-bottom: 10px;">#{index}</div>
-            <div style="margin-top: 5px;">
+            <div style="margin-top: 10px;">
                 {streamed_text}
                 <br><br>
                 {download_link}
