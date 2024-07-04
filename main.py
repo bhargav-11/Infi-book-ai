@@ -7,8 +7,10 @@ import io
 import streamlit as st
 from dotenv import load_dotenv
 import asyncio
+from file_extension import FileExtension
 from chat_utils import streamchat
 from pdfminer.high_level import extract_text
+from file_utils import extract_doc_text, extract_docx_text
 from query_engine import get_all_ids, get_query_engine_from_text, reset_collection
 
 load_dotenv()
@@ -29,7 +31,7 @@ async def main():
         st.header("Input Section")
         uploaded_files = st.file_uploader("Upload File",
                                           accept_multiple_files=True,
-                                          type=["pdf"],
+                                          type=["pdf","docx"],
                                           key="general_agent")
         
         text_area = st.text_area("Provide sub chapters separated by |")
@@ -55,7 +57,12 @@ async def main():
             st.session_state.generated_responses ={}
             all_text = ""
             for uploaded_file in uploaded_files:
-                all_text += extract_text(uploaded_file) + "\n\n"
+                if uploaded_file.type == FileExtension.PDF.value:
+                    all_text += extract_text(uploaded_file) + "\n\n"
+                elif uploaded_file.type == FileExtension.DOCX.value:
+                    all_text += extract_docx_text(uploaded_file)
+                # elif uploaded_file.type == FileExtension.DOC.value:
+                #     all_text += extract_doc_text(uploaded_file)
 
             query_engine = get_query_engine_from_text(all_text, top_k=7)
             st.session_state.query_engine = query_engine

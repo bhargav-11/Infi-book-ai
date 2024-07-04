@@ -1,9 +1,11 @@
 import base64
 from io import BytesIO
 
+from docx import Document
 import docx
 import markdown2
 from htmldocx import HtmlToDocx
+import docx2txt
 
 
 def generate_document(text, idx,title):
@@ -60,14 +62,13 @@ def create_download_link(val, filename):
   return f'<a href="data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,{b64.decode()}" download="{filename}">Download file</a>'
 
 
+def extract_doc_text(doc_file):
+    text = docx2txt.process(doc_file)
+    return text
 
-# Function to format markdown tables
-# def format_markdown_tables(md_text):
-#         table_pattern = r'\|.*\|.*\n\|.*\|.*\n(\|.*\|.*\n)+'
-#         tables = re.findall(table_pattern, md_text, re.MULTILINE)
-        
-#         for table in tables:
-#             formatted_table = table.replace('\n', '<br>')
-#             md_text = md_text.replace(table, formatted_table)
-        
-#         return md_text
+def extract_docx_text(docx_file):
+    doc = Document(docx_file)
+    full_text = []
+    for paragraph in doc.paragraphs:
+        full_text.append(paragraph.text)
+    return '\n'.join(full_text)
