@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from constants import BOOK_GENERATOR
-from file_utils import generate_document
+from file_utils import generate_document,generate_download_link
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
@@ -71,7 +71,8 @@ async def streamchat(placeholder,query,index):
             placeholder.info(streamed_text)
 
     title = extract_title(streamed_text) or f"Document {index}"
-    download_link,doc_bytes = generate_document(streamed_text, index,title)
+    doc_bytes = generate_document(streamed_text, index,title)
+    download_link = generate_download_link(streamed_text,title)
     document_name = f"{title}.docx" if title else f"generated_document_{index}.docx"
     st.session_state.all_documents[document_name] = doc_bytes
     
