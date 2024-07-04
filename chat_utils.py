@@ -12,34 +12,34 @@ from file_utils import generate_document
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
-llm = OpenAI(api_key=openai_api_key, model="gpt-4o")
+# llm = OpenAI(api_key=openai_api_key, model="gpt-4o")
 llm_async = AsyncOpenAI(api_key=openai_api_key)
 
-def generate_rag_response(query):
-    """
-  Generate a response using the RAG pipeline.
+# def generate_rag_response(query):
+#     """
+#   Generate a response using the RAG pipeline.
 
-  Args:
-      query (str): The query to generate a response using qa_chain.
+#   Args:
+#       query (str): The query to generate a response using qa_chain.
 
-  Returns:
-      str: The generated response.
-  """
-    if "query_engine" not in st.session_state:
-        return "Sorry no document found"
+#   Returns:
+#       str: The generated response.
+#   """
+#     if "query_engine" not in st.session_state:
+#         return "Sorry no document found"
 
-    chunks = st.session_state.query_engine.query(query)
-    context_str = "\n\n".join(chunk.get("content") for chunk in chunks)
-    prompt = BOOK_GENERATOR.format(
-        query=query,context=context_str
-    )
-    response=chat(prompt)
-    return response
+#     chunks = st.session_state.query_engine.query(query)
+#     context_str = "\n\n".join(chunk.get("content") for chunk in chunks)
+#     prompt = BOOK_GENERATOR.format(
+#         query=query,context=context_str
+#     )
+#     response=chat(prompt)
+#     return response
 
 
-def chat(prompt):
-    response = llm.complete(prompt)
-    return response.text
+# def chat(prompt):
+#     response = llm.complete(prompt)
+#     return response.text
 
 
 async def streamchat(placeholder,query,index):
@@ -55,11 +55,12 @@ async def streamchat(placeholder,query,index):
     stream_coroutine  = llm_async.chat.completions.create(
         model="gpt-4o",
         messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "system", "content": "You are an advanced AI assistant. You are helpful, informative, and friendly. Your responses should be engaging, polite, and clear. Provide accurate information and clarify any ambiguities. If you don't know the answer to a question, say so honestly. Maintain a neutral tone and do not express personal opinions. Assist users with their questions and provide explanations where necessary."},
             {"role": "user", "content": prompt},
         ],
         stream=True,
-        temperature=0.4,
+        temperature=0.7,
+        top_p=1
     )
     stream = await stream_coroutine
     streamed_text = " "
