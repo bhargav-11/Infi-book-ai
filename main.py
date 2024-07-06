@@ -31,7 +31,7 @@ async def main():
         st.header("Input Section")
         uploaded_files = st.file_uploader("Upload File",
                                           accept_multiple_files=True,
-                                          type=["pdf","docx"],
+                                          type=["pdf","docx","doc"],
                                           key="general_agent")
         
         text_area = st.text_area("Provide sub chapters separated by |")
@@ -49,10 +49,10 @@ async def main():
 
     # Main area for content
     main_content = st.empty()
-
     if generate_button:
         if uploaded_files:
             reset_collection()
+            
             st.session_state.all_documents = {}
             st.session_state.generated_responses ={}
             all_text = ""
@@ -61,8 +61,8 @@ async def main():
                     all_text += extract_text(uploaded_file) + "\n\n"
                 elif uploaded_file.type == FileExtension.DOCX.value:
                     all_text += extract_docx_text(uploaded_file)
-                # elif uploaded_file.type == FileExtension.DOC.value:
-                #     all_text += extract_doc_text(uploaded_file)
+                elif uploaded_file.type == FileExtension.DOC.value:
+                    all_text += extract_doc_text(uploaded_file)
 
             query_engine = get_query_engine_from_text(all_text, top_k=7)
             st.session_state.query_engine = query_engine
