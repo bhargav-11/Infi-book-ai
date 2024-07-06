@@ -1,5 +1,6 @@
 import os
 import re
+import asyncio
 
 from constants import OPENAI_MODEL,CLAUDE_MODEL
 from llm_provider import LLMProvider
@@ -68,6 +69,7 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
             for text in stream.text_stream:
                 streamed_text += text
                 placeholder.info(streamed_text)
+                await asyncio.sleep(0)
     else:
         placeholder.info("Invalid model choice. Please choose 'openai' or 'claude'.")
 
