@@ -1,3 +1,6 @@
+OPENAI_MODEL="gpt-4o"
+CLAUDE_MODEL="claude-3-sonnet-20240229"
+
 short_book_generator_prompt = """
 You are an AI writing assistant tasked with creating a short book on a specific subtopic from a larger book. The input you will receive includes:
 

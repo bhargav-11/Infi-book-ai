@@ -36,6 +36,11 @@ async def main():
         
         text_area = st.text_area("Provide sub chapters separated by |")
         textsplit = text_area.split("|") if text_area else []
+        st.selectbox(
+            label="Choose LLM provider",
+            options=("OPENAI", "CLAUDE"),
+            key="llm_provider"
+        )
         
         if st.button("Clear memory"):
             st.session_state.all_documents = {}
@@ -46,6 +51,7 @@ async def main():
         generate_button = st.button('Generate documents')
 
         download_button_placeholder = st.empty()
+
 
     # Main area for content
     main_content = st.empty()
@@ -104,7 +110,7 @@ async def generate_documents(textsplit, main_content):
         # Use modulo to cycle through the fixed columns
         col = columns[(idx-1) % num_fixed_columns]
         output_placeholder = col.empty()
-        tasks.append(streamchat(output_placeholder, text.strip(), idx))
+        tasks.append(streamchat(output_placeholder, text.strip(), idx,st.session_state.llm_provider))
 
     await asyncio.gather(*tasks)
 
