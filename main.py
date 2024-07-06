@@ -92,7 +92,10 @@ async def generate_documents(textsplit, main_content):
         return
 
     # Create a fixed number of columns
-    num_fixed_columns = 3
+
+    num_fixed_columns = len(textsplit)
+    if len(textsplit) > 3:
+        num_fixed_columns = 3
     columns = main_content.columns(num_fixed_columns)
 
     tasks = []
