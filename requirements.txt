@@ -1,3 +1,4 @@
+doc2docx==0.2.4
 pdfminer.six
 streamlit==1.35.0
 python-dotenv==1.0.1

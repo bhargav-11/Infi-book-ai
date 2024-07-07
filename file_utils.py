@@ -1,6 +1,9 @@
 import base64
 from io import BytesIO
 
+import os
+from doc2docx import convert
+from docx import Document
 import docx
 import markdown2
 from htmldocx import HtmlToDocx
@@ -60,14 +63,34 @@ def create_download_link(val, filename):
   return f'<a href="data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,{b64.decode()}" download="{filename}">Download file</a>'
 
 
+def extract_doc_text(uploaded_file):
+    
+  tmpdirname = './tmp'
+  if not os.path.exists(tmpdirname):
+      os.makedirs(tmpdirname)
 
-# Function to format markdown tables
-# def format_markdown_tables(md_text):
-#         table_pattern = r'\|.*\|.*\n\|.*\|.*\n(\|.*\|.*\n)+'
-#         tables = re.findall(table_pattern, md_text, re.MULTILINE)
-        
-#         for table in tables:
-#             formatted_table = table.replace('\n', '<br>')
-#             md_text = md_text.replace(table, formatted_table)
-        
-#         return md_text
+  # Define the paths for the input and output files
+  input_file_path = os.path.join(tmpdirname, uploaded_file.name)
+  output_file_path = os.path.join(tmpdirname, "output.docx")
+  
+  # Save the uploaded file to the tmp location
+  with open(input_file_path, 'wb') as f:
+      f.write(uploaded_file.read())
+  
+  try:
+      convert(input_file_path, output_file_path)
+      all_text = extract_docx_text(output_file_path)      
+      return all_text  
+  finally:
+      # Clean up the temporary files if needed
+      if os.path.exists(input_file_path):
+          os.remove(input_file_path)
+      if os.path.exists(output_file_path):
+          os.remove(output_file_path)
+
+def extract_docx_text(docx_file):
+    doc = Document(docx_file)
+    full_text = []
+    for paragraph in doc.paragraphs:
+        full_text.append(paragraph.text)
+    return '\n'.join(full_text)
