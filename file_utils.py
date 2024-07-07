@@ -28,6 +28,17 @@ def generate_document(text, idx,title):
   html_to_docx_parser = HtmlToDocx()
   html_to_docx_parser.add_html_to_document(html, doc)
 
+  # Add borders to all tables in the document
+  for table in doc.tables:
+        set_table_border(table, border_size=4)
+        
+        # Optionally, set a background color for header row
+        for cell in table.rows[0].cells:
+            cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+            shading_elm = OxmlElement('w:shd')
+            shading_elm.set(qn('w:fill'), '2F5496')
+            cell._tc.get_or_add_tcPr().append(shading_elm)
+
   # Save the document to a BytesIO object
   file_bytes = BytesIO()
   doc.save(file_bytes)
@@ -56,7 +67,6 @@ def generate_download_link(text,title):
 
   # Add borders to all tables in the document
   for table in doc.tables:
-        print("Table :",table)
         set_table_border(table, border_size=4)
         
         # Optionally, set a background color for header row
