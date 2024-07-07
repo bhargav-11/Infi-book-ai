@@ -65,6 +65,7 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
                 {"role": "user", "content": system_message+prompt}
             ],
             model=CLAUDE_MODEL,
+            temperature=0.7
         ) as stream:
             for text in stream.text_stream:
                 streamed_text += text
