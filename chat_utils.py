@@ -74,9 +74,9 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
         placeholder.info("Invalid model choice. Please choose 'openai' or 'claude'.")
 
 
-    title = extract_title(streamed_text) or f"Document {index}"
-    doc_bytes = generate_document(streamed_text, index,title)
-    download_link = generate_download_link(streamed_text,title)
+    title,streamed_text_without_title  = extract_title(streamed_text) or f"Document {index}"
+    doc_bytes = generate_document(streamed_text_without_title, index,title)
+    download_link = generate_download_link(streamed_text_without_title,title)
     document_name = f"{title}.docx" if title else f"generated_document_{index}.docx"
     st.session_state.all_documents[document_name] = doc_bytes
     
@@ -122,7 +122,7 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
             <div class="chat-index">#{index}</div>
             <div class="chat-content">
             <h2>{title} </h2>
-                {streamed_text}
+                {streamed_text_without_title}
                 <br><br>
                 {download_link}
             </div>
@@ -135,12 +135,14 @@ def extract_title(text):
     # Try to find a line starting with ## or #
     match = re.search(r'^\s*(##?\s*)(.+)$', text, re.MULTILINE)
     if match:
-        return match.group(2).strip()
+        title = match.group(2).strip()
+        text = re.sub(r'^\s*##?\s*.+\n?', '', text, count=1, flags=re.MULTILINE)
+        return title, text
 
     # If no match found, try to find the first non-empty line
     lines = text.split('\n')
-    for line in lines:
+    for i, line in enumerate(lines):
         if line.strip():
-            return line.strip()
+            return line.strip(), '\n'.join(lines[i+1:])
 
-    return None
+    return None, text
