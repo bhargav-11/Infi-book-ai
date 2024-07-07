@@ -7,6 +7,11 @@ from docx import Document
 import docx
 import markdown2
 from htmldocx import HtmlToDocx
+from docx.shared import Pt
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+from docx.shared import RGBColor
 
 
 def generate_document(text, idx,title):
@@ -47,6 +52,20 @@ def generate_download_link(text,title):
   html_to_docx_parser.add_html_to_document(html, doc)
 
 
+  
+
+  # Add borders to all tables in the document
+  for table in doc.tables:
+        print("Table :",table)
+        set_table_border(table, border_size=4)
+        
+        # Optionally, set a background color for header row
+        for cell in table.rows[0].cells:
+            cell.paragraphs[0].runs[0].font.color.rgb = RGBColor(255, 255, 255)
+            shading_elm = OxmlElement('w:shd')
+            shading_elm.set(qn('w:fill'), '2F5496')
+            cell._tc.get_or_add_tcPr().append(shading_elm)
+    
   # Save the document to a BytesIO object
   file_bytes = BytesIO()
   doc.save(file_bytes)
@@ -94,3 +113,15 @@ def extract_docx_text(docx_file):
     for paragraph in doc.paragraphs:
         full_text.append(paragraph.text)
     return '\n'.join(full_text)
+
+
+def set_table_border(table, border_size=1):
+    tbl_pr = table._element.xpath('w:tblPr')[0]
+    borders = OxmlElement('w:tblBorders')
+    for border in ['top', 'left', 'bottom', 'right', 'insideH', 'insideV']:
+        edge = OxmlElement(f'w:{border}')
+        edge.set(qn('w:sz'), str(border_size))
+        edge.set(qn('w:val'), 'single')
+        edge.set(qn('w:color'), '000000')
+        borders.append(edge)
+    tbl_pr.append(borders)
