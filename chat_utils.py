@@ -34,45 +34,50 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
     system_message = "You are an advanced AI assistant. You are helpful, informative, and friendly. Your responses should be engaging, polite, and clear. Provide accurate information and clarify any ambiguities. If you don't know the answer to a question, say so honestly. Maintain a neutral tone and do not express personal opinions. Assist users with their questions and provide explanations where necessary."
     streamed_text = ""
 
-    if llm_provider == LLMProvider.OPENAI.value:
-        if not openai_api_key:
-             placeholder.info("Sorry , openai api key is not set.")
-             return
-        stream_coroutine  = openai_llm_async.chat.completions.create(
-            model=OPENAI_MODEL,
-            messages=[
-                {"role": "system", "content": system_message},
-                {"role": "user", "content": prompt},
-            ],
-            stream=True,
-            temperature=0.7,
-            top_p=1
-        )
-        stream = await stream_coroutine
-        
-        async for chunk in stream:
-            chunk_content = chunk.choices[0].delta.content
-            if chunk_content is not None:
-                streamed_text = streamed_text + chunk_content
-                placeholder.info(streamed_text)
-    elif llm_provider == LLMProvider.CLAUDE.value:
-        if not claude_api_key:
-             placeholder.info("Sorry , claude api key is not set.")
-             return
-        with claude_llm_async.messages.stream(
-            max_tokens=4096,
-            messages=[
-                {"role": "user", "content": system_message+prompt}
-            ],
-            model=CLAUDE_MODEL,
-            temperature=0.7
-        ) as stream:
-            for text in stream.text_stream:
-                streamed_text += text
-                placeholder.info(streamed_text)
-                await asyncio.sleep(0)
-    else:
-        placeholder.info("Invalid model choice. Please choose 'openai' or 'claude'.")
+    try:
+        if llm_provider == LLMProvider.OPENAI.value:
+            if not openai_api_key:
+                placeholder.info("Sorry , openai api key is not set.")
+                return
+            stream_coroutine  = openai_llm_async.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=[
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": prompt},
+                ],
+                stream=True,
+                temperature=0.7,
+                top_p=1
+            )
+            stream = await stream_coroutine
+            
+            async for chunk in stream:
+                chunk_content = chunk.choices[0].delta.content
+                if chunk_content is not None:
+                    streamed_text = streamed_text + chunk_content
+                    placeholder.info(streamed_text)
+        elif llm_provider == LLMProvider.CLAUDE.value:
+            if not claude_api_key:
+                placeholder.info("Sorry , claude api key is not set.")
+                return
+            with claude_llm_async.messages.stream(
+                max_tokens=4096,
+                messages=[
+                    {"role": "user", "content": system_message+prompt}
+                ],
+                model=CLAUDE_MODEL,
+                temperature=0.7
+            ) as stream:
+                for text in stream.text_stream:
+                    streamed_text += text
+                    placeholder.info(streamed_text)
+                    await asyncio.sleep(0)
+        else:
+            placeholder.info("Invalid model choice. Please choose 'openai' or 'claude'.")
+    except Exception as e:
+        print("Error in getting output :",e)
+        placeholder.info(f"Unable to get answer from LLM Provider : {llm_provider} ")
+
 
 
     title,streamed_text_without_title  = extract_title(streamed_text) or f"Document {index}"
