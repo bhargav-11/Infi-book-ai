@@ -17,7 +17,15 @@ chroma_collection = chroma_client.get_or_create_collection("chatbot-3")
 
 api_key =  os.getenv("OPENAI_API_KEY")
 
-def get_query_engine_from_text(text, top_k=12):
+
+def get_documents_from_text(text,filename,start_index):
+    text_splitter = TokenTextSplitter(chunk_size=400)
+    chunks=text_splitter.split_text(text)
+    documents = generate_documents_from_chunks(chunks,filename,start_index)
+    return documents
+
+
+def get_query_engine_from_text(documents, top_k=12):
     """ 
     Generate retriever from text
 
@@ -28,11 +36,8 @@ def get_query_engine_from_text(text, top_k=12):
     Returns:
         retriever (Retriever): The retriever.
     """
-    current_time = time.time()
     print("Retriever is being invoked")
-    text_splitter = TokenTextSplitter(chunk_size=400)
-    chunks=text_splitter.split_text(text)
-    documents = generate_documents_from_chunks(chunks)
+    current_time = time.time()
     
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
@@ -53,12 +58,13 @@ def get_query_engine_from_text(text, top_k=12):
     return query_engine
 
 
-def generate_documents_from_chunks(chunks):
+def generate_documents_from_chunks(chunks,filename,start_index=1):
     documents = []
-    for idx,txt in enumerate(chunks,start=1):
+    for idx,txt in enumerate(chunks,start=start_index):
         document = Document(
             doc_id = idx,
             text = txt,
+            metadata={"filename": f"{filename}"},
         )
         documents.append(document)
     

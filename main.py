@@ -1,6 +1,6 @@
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+# __import__('pysqlite3')
+# import sys
+# sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
 import zipfile
 import io
@@ -11,7 +11,7 @@ from file_extension import FileExtension
 from chat_utils import streamchat
 from pdfminer.high_level import extract_text
 from file_utils import extract_doc_text, extract_docx_text
-from query_engine import get_all_ids, get_query_engine_from_text, reset_collection
+from query_engine import get_all_ids, get_documents_from_text, get_query_engine_from_text, reset_collection
 
 load_dotenv()
 
@@ -61,16 +61,26 @@ async def main():
             
             st.session_state.all_documents = {}
             st.session_state.generated_responses ={}
-            all_text = ""
+            documents = []
+            index=1
             for uploaded_file in uploaded_files:
                 if uploaded_file.type == FileExtension.PDF.value:
-                    all_text += extract_text(uploaded_file) + "\n\n"
+                    text= extract_text(uploaded_file)
+                    documents_from_pdf = get_documents_from_text(text,uploaded_file.name,index)
+                    documents.extend(documents_from_pdf) 
+                    index+= len(documents_from_pdf)
                 elif uploaded_file.type == FileExtension.DOCX.value:
-                    all_text += extract_docx_text(uploaded_file)
+                    text= extract_docx_text(uploaded_file)
+                    documents_from_docx = get_documents_from_text(text,uploaded_file.name,index)
+                    documents.extend(documents_from_docx)
+                    index += len(documents_from_docx)
                 elif uploaded_file.type == FileExtension.DOC.value:
-                    all_text += extract_doc_text(uploaded_file)
+                    text=extract_doc_text(uploaded_file)
+                    documents_from_doc= get_documents_from_text(text,uploaded_file.name,index)
+                    documents.extend(documents_from_doc)
+                    index+=len(documents_from_doc)
 
-            query_engine = get_query_engine_from_text(all_text, top_k=7)
+            query_engine = get_query_engine_from_text(documents, top_k=7)
             st.session_state.query_engine = query_engine
         
         main_content.write("Generating documents...")
