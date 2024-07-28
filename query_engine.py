@@ -4,6 +4,9 @@ import time
 import chromadb
 from llama_index.core import StorageContext,VectorStoreIndex,ServiceContext,Document
 
+from unstructured.partition.pdf import partition_pdf
+from pdfminer.high_level import extract_pages
+from pdfminer.layout import LTTextContainer
 from llama_index.core.node_parser import TokenTextSplitter
 from custom_query_engine import RAGStringQueryEngine
 from llama_index.vector_stores.chroma import ChromaVectorStore
@@ -17,13 +20,49 @@ chroma_collection = chroma_client.get_or_create_collection("chatbot-3")
 
 api_key =  os.getenv("OPENAI_API_KEY")
 
+from pdfminer.high_level import extract_text
 
-def get_documents_from_text(text,filename,start_index):
+def get_documents_from_text(uploaded_file,text,filename,start_index):
+    text= extract_text(uploaded_file)
     text_splitter = TokenTextSplitter(chunk_size=400)
     chunks=text_splitter.split_text(text)
     documents = generate_documents_from_chunks(chunks,filename,start_index)
     return documents
 
+
+def get_documents_from_pdf(uplaoded_file,start_index):
+    filename = uplaoded_file.name
+    elements = partition_pdf(file=uplaoded_file)
+    print("elements : ",elements)
+
+def get_documents_from_text_for_pdf(uplaoded_file,start_index):
+    filename = uplaoded_file.name
+    pages = list(extract_pages(uplaoded_file))
+    text_with_page = []
+    
+    for page_num, page in enumerate(pages, 1):
+        page_text = ""
+        for element in page:
+            if isinstance(element, LTTextContainer):
+                page_text += element.get_text()
+        text_with_page.append((page_text, page_num))
+    
+    text_splitter = TokenTextSplitter(chunk_size=400)
+    documents = []
+    current_index = start_index
+
+    for page_text, page_num in text_with_page:
+        chunks = text_splitter.split_text(page_text)
+        for chunk in chunks:
+            document = Document(
+                doc_id = current_index,
+                text = chunk,
+                metadata={"filename": f"{filename}","page": page_num},
+            )
+            documents.append(document)
+            current_index+=1
+
+    return documents
 
 def get_query_engine_from_text(documents, top_k=12):
     """ 

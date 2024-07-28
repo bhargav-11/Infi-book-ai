@@ -11,7 +11,7 @@ from file_extension import FileExtension
 from chat_utils import streamchat
 from pdfminer.high_level import extract_text
 from file_utils import extract_doc_text, extract_docx_text
-from query_engine import get_all_ids, get_documents_from_text, get_query_engine_from_text, reset_collection
+from query_engine import get_all_ids, get_documents_from_pdf, get_documents_from_text, get_documents_from_text_for_pdf, get_query_engine_from_text, reset_collection
 
 load_dotenv()
 
@@ -65,8 +65,10 @@ async def main():
             index=1
             for uploaded_file in uploaded_files:
                 if uploaded_file.type == FileExtension.PDF.value:
-                    text= extract_text(uploaded_file)
-                    documents_from_pdf = get_documents_from_text(text,uploaded_file.name,index)
+                    # text= extract_text(uploaded_file)
+                    # documents_from_pdf = get_documents_from_text(text,uploaded_file.name,index)
+                    documents_from_pdf = get_documents_from_pdf(uploaded_file,index)
+                    print("Documents from pdf :",documents_from_pdf)
                     documents.extend(documents_from_pdf) 
                     index+= len(documents_from_pdf)
                 elif uploaded_file.type == FileExtension.DOCX.value:
