@@ -5,7 +5,7 @@ from tavily import TavilyClient
 import asyncio
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
-tavily_api_key =  os.getenv("OPENAI_API_KEY")
+tavily_api_key =  os.getenv("TAVILY_API_KEY")
 
 async def get_answer(query,context):
     prompt = (
@@ -62,7 +62,8 @@ async def identify_subqueries_for_search_and_retrieval(user_query):
     "1. Read the user's query carefully.\n"
     "2. Identify distinct search tasks or components within the query.\n"
     "3. List each search task separately for targeted searches, limiting to a maximum of 3 queries.\n"
-    "4. Generate subqueries for retrieving content from uploaded items, ensuring all queries are concise.Limit to a maximum of 3 and minimum of 1 query.\n\n"
+    "4. Generate subqueries for retrieving content from uploaded items, "
+    "ensuring all queries are concise.Limit to a maximum of 3 and minimum of 1 query.Only generate search queries if needed.\n\n"
     "Example Query:\n"
     "Look online and research NinePoint Medical. Create a detailed analysis of what the company makes (by product name if possible), "
     "who they sell to (specifically), and who their target market is. Include any information about their manufacturing practice, "
@@ -116,23 +117,14 @@ async def process_search_query(search_query):
         print(f"Error in processing search query '{search_query}': {e}")
         return None
 
-async def aggregate_search_results(query):
-    try:
-        search_queries, retrieval_subqueries =await identify_subqueries_for_search_and_retrieval(query)
-    except Exception as e:
-        print(f"Error in identifying subqueries: {e}")
-        raise e
-
-    results = {
-        "query": query,
-        "search_results": []
-    }
+async def aggregate_search_results(search_queries):
+    results = []
 
     tasks = [process_search_query(search_query) for search_query in search_queries]
     search_results = await asyncio.gather(*tasks)
 
     for result in search_results:
         if result is not None:
-            results["search_results"].append(result)
+            results.append(result)
 
-    return results, retrieval_subqueries
+    return results
