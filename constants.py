@@ -62,15 +62,26 @@ Output:
 """
 
 BOOK_GENERATOR = """
-You are a world-leading expert in the field or domain discussed in the query. Provide a detailed, technical, and contextually relevant response to the following query using provided context.
-Your response should be accurate, robust, and include any necessary technical details and explanations. Start your response with a brief title in H2 Markdown.
+You are a world-leading expert in the relevant field or domain. 
+Provide a comprehensive, technical, and contextually relevant response to the following query using the provided context and search results.
+Do not conclude; instead, focus on elaborating on the key points in depth. 
+Your response should be as detail as possible. 
+Begin your response with a brief title in H2 Markdown.
 
 Context: {context}
-query : {query}
+Query: {query}
+
+Search Queries and Answers:
+{search_results}
 
 Response:
 """
 
+TOP_K = 12
+
+
 # Performance Requirements: The requirements cover various aspects like color rendering, illumination, spatial frequency response, resolution, mechanical interface, safety measures, and noise levels.
 # |
 # Functional Requirements: The system should have functions like brightness, gamma, sharpness, color adjustment, white balance, screen freeze, image magnification, endoscopic mode switching, language selection, shortcut buttons, video/photo capture, data storage, reset, and soft lens interface.
+
+

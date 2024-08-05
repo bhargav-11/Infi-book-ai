@@ -22,7 +22,8 @@ class RAGStringQueryEngine(CustomQueryEngine):
                 {
                     "content": n.node.get_content(),
                     "score": n.score,
-                    "metadata": metadata
+                    "metadata": metadata,
+                    "id": n.metadata.get("id")
                 }
             )
 
