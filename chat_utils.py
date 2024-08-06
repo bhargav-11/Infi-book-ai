@@ -50,9 +50,7 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
         
         source_links = get_random_source_links(search_queries_result)
     else:
-         prompt = BOOK_GENERATOR.format(
-                query=query,context=context_str
-        )
+         prompt = BOOK_GENERATOR.format( query=query,context=context_str,search_results="None")
          source_links= []
 
     system_message = f"""
