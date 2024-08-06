@@ -202,8 +202,7 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
                 <div class="source-list">
                 {''.join([f'<span class="source-chip">{source}</span>' for source in unique_sources])}
                 </div>
-                <div class="source-list">
-                    {''.join([f'<span class="source-chip"><a href="{source}" target="_blank">{source}</a></span>' for source in source_links])}
+                 {''.join([f'<span class="source-chip"><a href="{source}" target="_blank">{source}</a></span>' for source in source_links if source]) or '<span class="no-sources">No sources Links</span>'}
             </div>
             </div>
         </div>
