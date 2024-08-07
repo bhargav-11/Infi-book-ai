@@ -64,7 +64,7 @@ Output:
 BOOK_GENERATOR = """
 You are a world-leading expert in the relevant field or domain. 
 Provide a comprehensive, technical, and contextually relevant response to the following query using the provided context and search results.
-Do not conclude; instead, focus on elaborating on the key points in depth. 
+Do not provide conclusion , instead, focus on elaborating on the key points as much as possible in depth. 
 Your response should be as detail as possible. 
 Begin your response with a brief title in H2 Markdown.
 

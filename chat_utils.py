@@ -25,9 +25,6 @@ claude_llm_async = Anthropic(api_key=claude_api_key)
 
 
 async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.value):
-    if "query_engine" not in st.session_state:
-        return "Sorry no document found"
-    
     try:
         search_queries, retrieval_subqueries =await identify_subqueries_for_search_and_retrieval(query)
     except Exception as e:
@@ -35,10 +32,15 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
         search_queries = []
         retrieval_subqueries = []
     
-    chunks = st.session_state.query_engine.query(query)
-    if retrieval_subqueries:
-        for subquery in retrieval_subqueries:
-            chunks.extend(st.session_state.query_engine.query(subquery))
+    try:
+        chunks = st.session_state.query_engine.query(query)
+        if retrieval_subqueries:
+            for subquery in retrieval_subqueries:
+                chunks.extend(st.session_state.query_engine.query(subquery))
+    except Exception as e:
+        print("No query engine found")
+        chunks = []
+    
 
     sorted_chunks = process_chunks(chunks,TOP_K)
     unique_sources = get_unique_sources(sorted_chunks)
@@ -50,9 +52,7 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
         
         source_links = get_random_source_links(search_queries_result)
     else:
-         prompt = BOOK_GENERATOR.format(
-                query=query,context=context_str
-        )
+         prompt = BOOK_GENERATOR.format( query=query,context=context_str,search_results="None")
          source_links= []
 
     system_message = f"""
@@ -192,7 +192,7 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
 
     placeholder.markdown(
         f'''
-        <div class="chat-container">
+         <div class="chat-container">
             <div class="chat-index">#{index}</div>
             <div class="chat-content">
             <h2>{title} </h2>
@@ -202,11 +202,11 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
                     {download_link}
                 </div>
                 <div class="source-list">
-                {''.join([f'<span class="source-chip">{source}</span>' for source in unique_sources])}
+                    {''.join([f'<span class="source-chip">{source}</span>' for source in unique_sources if source]) or '<span class="no-sources">No document sources available</span>'}
                 </div>
                 <div class="source-list">
-                    {''.join([f'<span class="source-chip"><a href="{source}" target="_blank">{source}</a></span>' for source in source_links])}
-            </div>
+                    {''.join([f'<span class="source-chip"><a href="{source}" target="_blank">{source}</a></span>' for source in source_links if source]) or '<span class="no-sources">No source/url links available</span>'}
+                </div>
             </div>
         </div>
         ''',
