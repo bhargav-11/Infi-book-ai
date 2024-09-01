@@ -1,5 +1,5 @@
 OPENAI_MODEL="gpt-4o"
-CLAUDE_MODEL="claude-3-sonnet-20240229"
+CLAUDE_MODEL="claude-3-5-sonnet-20240620"
 
 short_book_generator_prompt = """
 You are an AI writing assistant tasked with creating a short book on a specific subtopic from a larger book. The input you will receive includes:
@@ -75,6 +75,32 @@ Search Queries and Answers:
 {search_results}
 
 Response:
+"""
+
+BOOK_GENERATOR_V2="""
+As a leading expert in the field, create a comprehensive and detailed document addressing the following query. Use the provided context and search results to inform your response.
+
+Guidelines:
+1. Structure the document based on the query's context and complexity.
+2. Provide in-depth explanations for each point, concept, or idea.
+3. Cover all relevant aspects, even those not explicitly mentioned in the query.
+4. Ignore token limits; focus on thorough exploration of the topic.
+5. Maintain technical accuracy and clarity.
+6. Use Markdown formatting to enhance readability.
+7. Do not provide a conclusion or summary section under any circumstances.
+
+Most Important Guidenline:
+1.If you reach a point where you would normally stop, instead transition to the next relevant subtopic or aspect of the query.
+2.Begin with a descriptive H1 Markdown title.
+
+Context: {context}
+Query: {query}
+
+Search Results:
+{search_results}
+
+Response:
+
 """
 
 TOP_K = 12
