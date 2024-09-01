@@ -14,7 +14,7 @@ from search import aggregate_search_results, identify_subqueries_for_search_and_
 
 load_dotenv(override=True)
 
-from constants import BOOK_GENERATOR
+from constants import BOOK_GENERATOR_V2
 from file_utils import generate_document,generate_download_link
 
 openai_api_key = os.environ["OPENAI_API_KEY"]
@@ -48,23 +48,25 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
     if search_queries:
         search_queries_result = await aggregate_search_results(search_queries)
         search_results = "\n\n".join(f"Search Query: {result['query']}\nAnswer: {result['answer']}" for result in search_queries_result)
-        prompt = BOOK_GENERATOR.format( query=query,context=context_str,search_results=search_results)
+        prompt = BOOK_GENERATOR_V2.format( query=query,context=context_str,search_results=search_results)
         
         source_links = get_random_source_links(search_queries_result)
     else:
-         prompt = BOOK_GENERATOR.format( query=query,context=context_str,search_results="None")
+         prompt = BOOK_GENERATOR_V2.format( query=query,context=context_str,search_results="None")
          source_links= []
 
     system_message = f"""
-    "You are an advanced AI assistant. You are helpful, informative, and friendly. Your responses should be engaging, polite, and clear. 
-    Provide accurate information and clarify any ambiguities. If you don't know the answer to a question, say so honestly. Maintain a neutral tone and do not express personal opinions.
-    Your responses should be as detailed and thorough as possible, including comprehensive explanations, examples, and analysis where appropriate.
-    Avoid concluding remarks; instead, focus on elaborating on the key points in depth.
+    "You are an advanced AI assistant. You are helpful, informative, and friendly. 
+    You are an AI capable of generating extremely detailed and comprehensive responses. 
+    Your goal is to provide the most thorough and extensive information possible, without any regard for length constraints. 
+    Continue expanding on each point until you've exhausted all relevant details
+    Do not provide conclusion section.
     """    
     streamed_text = ""
 
     try:
         if llm_provider == LLMProvider.OPENAI.value:
+            finish_reason = ""
             if not openai_api_key:
                 placeholder.info("Sorry , openai api key is not set.")
                 return
@@ -75,16 +77,38 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
                     {"role": "user", "content": prompt},
                 ],
                 stream=True,
-                temperature=0.7,
-                top_p=1
             )
             stream = await stream_coroutine
             
             async for chunk in stream:
                 chunk_content = chunk.choices[0].delta.content
+                finish_reason= chunk.choices[0].finish_reason
                 if chunk_content is not None:
                     streamed_text = streamed_text + chunk_content
                     placeholder.info(streamed_text)
+
+            if finish_reason == "length":
+                stream_coroutine  = openai_llm_async.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=[
+                    {"role": "system", "content": system_message},
+                    {"role": "user", "content": prompt},
+                    {"role":"assistant","content":streamed_text},
+                    {"role":"user", "content":"Continue "}
+                ],
+                stream=True,
+                )
+                
+                stream = await stream_coroutine
+
+                async for chunk in stream:
+                    chunk_content = chunk.choices[0].delta.content
+                    finish_reason= chunk.choices[0].finish_reason
+                    if chunk_content is not None:
+                        streamed_text = streamed_text + chunk_content
+                        placeholder.info(streamed_text)
+                
+
         elif llm_provider == LLMProvider.CLAUDE.value:
             if not claude_api_key:
                 placeholder.info("Sorry , claude api key is not set.")
