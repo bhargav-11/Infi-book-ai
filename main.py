@@ -36,6 +36,13 @@ async def main():
         
         text_area = st.text_area("Provide sub chapters separated by |")
         textsplit = text_area.split("|") if text_area else []
+
+        st.selectbox(
+            label="Search the Internet for information",
+            options=("Yes", "No"),
+            key="search_engine"
+        )
+
         st.selectbox(
             label="Choose LLM provider",
             options=("OPENAI", "CLAUDE"),
