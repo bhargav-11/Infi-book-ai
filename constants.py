@@ -80,6 +80,75 @@ Response:
 TOP_K = 12
 
 
+SEARCH_AND_RETRIEVAL_PROMPT = """
+You are an AI assistant specialized in parsing complex queries to identify distinct search tasks and subqueries for retrieval. 
+For each user query, separate the overall request into:
+
+1. Internet search queries (limited to 4 and concise).
+2. Subqueries for retrieving content from uploaded items.
+
+Instructions:
+1. Read the user's query carefully.
+2. Identify distinct search tasks or components within the query.
+3. List each search task separately for targeted searches, limiting to a maximum of 3 queries.
+4. Generate subqueries for retrieving content from uploaded items, ensuring all queries are concise. 
+   Limit to a maximum of 3 and minimum of 1 query. Only generate search queries if needed.
+
+Example Query:
+Look online and research NinePoint Medical. Create a detailed analysis of what the company makes (by product name if possible), 
+who they sell to (specifically), and who their target market is. Include any information about their manufacturing practice, 
+key people, key metrics (size, location, personnel count, reputation), and contact info. Do not make up information.
+
+Output:
+{{
+  "query": "Look online and research NinePoint Medical. Create a detailed analysis of what the company makes (by product name if possible), 
+  who they sell to (specifically), and who their target market is. Include any information about their manufacturing practice, 
+  key people, key metrics (size, location, personnel count, reputation), and contact info. Do not make up information.",
+  "internet_search_queries": [
+    "NinePoint Medical product line",
+    "NinePoint Medical target market",
+    "NinePoint Medical key people and contact information",
+  ],
+  "retrieval_subqueries": [
+    "Manufacturing practices of NinePoint Medical",
+    "Key metrics of NinePoint Medical",
+    "Size and location of NinePoint Medical",
+    "Personnel count of NinePoint Medical"
+  ]
+}}
+
+User Query: {user_query}
+
+Response (in JSON format):
+"""
+
+RETRIEVAL_ONLY_PROMPT = """
+You are an AI assistant specialized in parsing complex queries to identify subqueries for retrieving content from uploaded items. 
+For each user query, identify distinct subqueries for retrieval.
+
+Instructions:
+1. Read the user's query carefully.
+2. Generate subqueries for retrieving content from uploaded items, ensuring all queries are concise. 
+   Limit to a maximum of 3 and minimum of 1 query.
+
+Example Query:
+Analyze uploaded documents to extract financial data, summarize project timelines, and identify stakeholders.
+
+Output:
+{{
+  "query": "Analyze uploaded documents to extract financial data, summarize project timelines, and identify stakeholders.",
+  "retrieval_subqueries": [
+    "Extract financial data from uploaded documents",
+    "Summarize project timelines from uploaded documents",
+    "Identify stakeholders from uploaded documents"
+  ]
+}}
+
+User Query: {user_query}
+
+Response (in JSON format):
+"""
+
 # Performance Requirements: The requirements cover various aspects like color rendering, illumination, spatial frequency response, resolution, mechanical interface, safety measures, and noise levels.
 # |
 # Functional Requirements: The system should have functions like brightness, gamma, sharpness, color adjustment, white balance, screen freeze, image magnification, endoscopic mode switching, language selection, shortcut buttons, video/photo capture, data storage, reset, and soft lens interface.

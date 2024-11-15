@@ -1,8 +1,11 @@
 import os
 import json
+import streamlit as st
+from constants import RETRIEVAL_ONLY_PROMPT, SEARCH_AND_RETRIEVAL_PROMPT
 from openai import OpenAI
 from tavily import TavilyClient
 import asyncio
+
 
 openai_api_key = os.getenv("OPENAI_API_KEY")
 tavily_api_key =  os.getenv("TAVILY_API_KEY")
@@ -53,41 +56,12 @@ def convert_to_json(response):
     return response_json
 
 async def identify_subqueries_for_search_and_retrieval(user_query):
-    prompt = (
-    "You are an AI assistant specialized in parsing complex queries to identify distinct search tasks and subqueries for retrieval. "
-    "For each user query, separate the overall request into:\n"
-    "1. Internet search queries (limited to 4 and concise).\n"
-    "2. Subqueries for retrieving content from uploaded items.\n\n"
-    "Instructions:\n"
-    "1. Read the user's query carefully.\n"
-    "2. Identify distinct search tasks or components within the query.\n"
-    "3. List each search task separately for targeted searches, limiting to a maximum of 3 queries.\n"
-    "4. Generate subqueries for retrieving content from uploaded items, "
-    "ensuring all queries are concise.Limit to a maximum of 3 and minimum of 1 query.Only generate search queries if needed.\n\n"
-    "Example Query:\n"
-    "Look online and research NinePoint Medical. Create a detailed analysis of what the company makes (by product name if possible), "
-    "who they sell to (specifically), and who their target market is. Include any information about their manufacturing practice, "
-    "key people, key metrics (size, location, personnel count, reputation), and contact info. Do not make up information.\n\n"
-    "Output:\n"
-    "{\n"
-    '  "query": "Look online and research NinePoint Medical. Create a detailed analysis of what the company makes (by product name if possible), '
-    'who they sell to (specifically), and who their target market is. Include any information about their manufacturing practice, '
-    'key people, key metrics (size, location, personnel count, reputation), and contact info. Do not make up information.",\n'
-    '  "internet_search_queries": [\n'
-    '    "NinePoint Medical product line",\n'
-    '    "NinePoint Medical target market",\n'
-    '    "NinePoint Medical key people and contact information",\n'
-    "  ],\n"
-    '  "retrieval_subqueries": [\n'
-    '    "Manufacturing practices of NinePoint Medical",\n'
-    '    "Key metrics of NinePoint Medical",\n'
-    '    "Size and location of NinePoint Medical",\n'
-    '    "Personnel count of NinePoint Medical"\n'
-    "  ]\n"
-    "}\n"
-    f"User Query: {user_query}\n\n"
-    "Response (in JSON format):"
-    )
+    
+    if st.session_state.search_engine == "Yes":
+        prompt = SEARCH_AND_RETRIEVAL_PROMPT.format(user_query=user_query)
+    else:
+        prompt = RETRIEVAL_ONLY_PROMPT.format(user_query=user_query)
+
     client = OpenAI(api_key=openai_api_key)
     response =await asyncio.to_thread(client.chat.completions.create,
                               model="gpt-4o-mini",
