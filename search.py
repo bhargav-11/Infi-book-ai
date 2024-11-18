@@ -57,7 +57,7 @@ def convert_to_json(response):
 
 async def identify_subqueries_for_search_and_retrieval(user_query):
     
-    if st.session_state.search_engine == "Yes":
+    if st.session_state.search_engine:
         prompt = SEARCH_AND_RETRIEVAL_PROMPT.format(user_query=user_query)
     else:
         prompt = RETRIEVAL_ONLY_PROMPT.format(user_query=user_query)
