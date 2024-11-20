@@ -2,6 +2,7 @@ __import__('pysqlite3')
 import sys
 sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
 
+import os
 import zipfile
 import io
 import streamlit as st
@@ -12,12 +13,16 @@ from chat_utils import streamchat
 from pdfminer.high_level import extract_text
 from file_utils import extract_doc_text, extract_docx_text
 from query_engine import get_all_ids, get_documents_from_text, get_query_engine_from_text, reset_collection
+from load_keys import load_keys
 
 load_dotenv()
 
 st.set_page_config(layout="wide")
 
 async def main():
+
+    load_keys()
+
     if 'all_documents' not in st.session_state:
         st.session_state.all_documents = {}
 

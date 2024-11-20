@@ -1,3 +1,8 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv(override=True)
+
 OPENAI_MODEL="gpt-4o"
 CLAUDE_MODEL="claude-3-5-sonnet-20240620"
 
@@ -174,6 +179,12 @@ User Query: {user_query}
 
 Response (in JSON format):
 """
+
+ENCRYPTED_KEYS_FILE_PATH = 'api_keys.json'
+ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
+OPENAI_API_KEY= os.getenv('OPENAI_API_KEY')
+CLAUDE_API_KEY = os.getenv('CLAUDE_API_KEY')
+TAVILY_API_KEY = os.getenv('TAVILY_API_KEY')
 
 # Performance Requirements: The requirements cover various aspects like color rendering, illumination, spatial frequency response, resolution, mechanical interface, safety measures, and noise levels.
 # |

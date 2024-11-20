@@ -1,16 +1,14 @@
-import os
 import json
 import streamlit as st
 from constants import RETRIEVAL_ONLY_PROMPT, SEARCH_AND_RETRIEVAL_PROMPT
 from openai import OpenAI
 from tavily import TavilyClient
+from constants import ENCRYPTED_KEYS_FILE_PATH,ENCRYPTION_KEY
+from config_manager import EncryptedConfigManager
 import asyncio
 
-
-openai_api_key = os.getenv("OPENAI_API_KEY")
-tavily_api_key =  os.getenv("TAVILY_API_KEY")
-
 async def get_answer(query,context):
+    config_manager = EncryptedConfigManager(ENCRYPTED_KEYS_FILE_PATH, ENCRYPTION_KEY)
     prompt = (
       "You are an AI assistant specialized in answers to query using the provided context."
       "Please make sure to provide answer from the provided context"
@@ -18,7 +16,7 @@ async def get_answer(query,context):
       f"Context: {context}\n\n"
       "Answer:"
     )
-    client = OpenAI(api_key=openai_api_key)
+    client = OpenAI(api_key=config_manager.get_key("OPENAI_API_KEY"))
     response = await asyncio.to_thread(client.chat.completions.create,
                         model="gpt-4o-mini",
                         messages=[{"role": "user", "content": prompt}])
@@ -27,7 +25,8 @@ async def get_answer(query,context):
 
 
 async def get_query_context(query):
-    tavily_client = TavilyClient(api_key=tavily_api_key)
+    config_manager = EncryptedConfigManager(ENCRYPTED_KEYS_FILE_PATH, ENCRYPTION_KEY)
+    tavily_client = TavilyClient(api_key=config_manager.get_key("TAVILY_API_KEY"))
 
     response = await asyncio.to_thread(
                 tavily_client.search,
@@ -56,13 +55,13 @@ def convert_to_json(response):
     return response_json
 
 async def identify_subqueries_for_search_and_retrieval(user_query):
-    
+    config_manager = EncryptedConfigManager(ENCRYPTED_KEYS_FILE_PATH, ENCRYPTION_KEY)
     if st.session_state.search_engine:
         prompt = SEARCH_AND_RETRIEVAL_PROMPT.format(user_query=user_query)
     else:
         prompt = RETRIEVAL_ONLY_PROMPT.format(user_query=user_query)
 
-    client = OpenAI(api_key=openai_api_key)
+    client = OpenAI(api_key=config_manager.get_key("OPENAI_API_KEY"))
     response =await asyncio.to_thread(client.chat.completions.create,
                               model="gpt-4o-mini",
                               messages=[{"role": "user", "content": prompt}])
