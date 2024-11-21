@@ -11,13 +11,18 @@ from file_extension import FileExtension
 from chat_utils import streamchat
 from pdfminer.high_level import extract_text
 from file_utils import extract_doc_text, extract_docx_text
-from query_engine import get_all_ids, get_documents_from_text, get_query_engine_from_text, reset_collection
+from query_engine import get_documents_from_text, get_query_engine_from_text, reset_collection
+from load_keys import load_keys
+from sidebar import render_sidebar
 
 load_dotenv()
 
 st.set_page_config(layout="wide")
 
 async def main():
+
+    load_keys()
+
     if 'all_documents' not in st.session_state:
         st.session_state.all_documents = {}
 
@@ -27,37 +32,7 @@ async def main():
     st.title("Infi Book AI")
 
     # Sidebar for input controls
-    with st.sidebar:
-        st.header("Input Section")
-        uploaded_files = st.file_uploader("Upload File",
-                                          accept_multiple_files=True,
-                                          type=["pdf","docx","doc"],
-                                          key="general_agent")
-        
-        text_area = st.text_area("Provide sub chapters separated by |")
-        textsplit = text_area.split("|") if text_area else []
-
-        st.toggle(
-            label="Search the Internet for information",
-            key="search_engine"
-        )
-
-        st.selectbox(
-            label="Choose LLM provider",
-            options=("OPENAI", "CLAUDE"),
-            key="llm_provider"
-        )
-        
-        if st.button("Clear memory"):
-            st.session_state.all_documents = {}
-            st.session_state.generated_responses ={}
-            st.session_state.documents_ready = False
-            reset_collection()
-        
-        generate_button = st.button('Generate documents')
-
-        download_button_placeholder = st.empty()
-
+    uploaded_files, textsplit, generate_button, download_button_placeholder = render_sidebar()
 
     # Main area for content
     main_content = st.empty()

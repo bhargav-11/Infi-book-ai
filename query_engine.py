@@ -1,22 +1,18 @@
-import os
 import time
 
 import chromadb
 from llama_index.core import StorageContext,VectorStoreIndex,ServiceContext,Document
 
 from llama_index.core.node_parser import TokenTextSplitter
-from constants import TOP_K
+from constants import TOP_K,ENCRYPTED_KEYS_FILE_PATH,ENCRYPTION_KEY
 from custom_query_engine import RAGStringQueryEngine
 from llama_index.vector_stores.chroma import ChromaVectorStore
 from llama_index.embeddings.openai import OpenAIEmbedding
-from dotenv import load_dotenv
-
-load_dotenv()
+from config_manager import EncryptedConfigManager
 
 chroma_client = chromadb.EphemeralClient()
 chroma_collection = chroma_client.get_or_create_collection("chatbot-3")
 
-api_key =  os.getenv("OPENAI_API_KEY")
 
 
 def get_documents_from_text(text,filename,start_index):
@@ -37,12 +33,13 @@ def get_query_engine_from_text(documents, top_k=TOP_K):
     Returns:
         retriever (Retriever): The retriever.
     """
+    config_manager = EncryptedConfigManager(ENCRYPTED_KEYS_FILE_PATH, ENCRYPTION_KEY)
     print("Retriever is being invoked")
     current_time = time.time()
     
     vector_store = ChromaVectorStore(chroma_collection=chroma_collection)
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
-    embeddings = OpenAIEmbedding(api_key=api_key,show_progress_bar=True,embed_batch_size=100)
+    embeddings = OpenAIEmbedding(api_key=config_manager.get_key("OPENAI_API_KEY"),show_progress_bar=True,embed_batch_size=100)
     service_context = ServiceContext.from_defaults(embed_model=embeddings)
     
     index = VectorStoreIndex.from_documents(

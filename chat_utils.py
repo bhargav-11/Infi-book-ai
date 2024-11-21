@@ -1,27 +1,20 @@
-import os
 import random
 import re
 import asyncio
 
-from constants import OPENAI_MODEL,CLAUDE_MODEL, TOP_K
+from constants import OPENAI_MODEL,CLAUDE_MODEL, TOP_K ,ENCRYPTED_KEYS_FILE_PATH,ENCRYPTION_KEY
 from llm_provider import LLMProvider
 from anthropic import Anthropic
 import streamlit as st
 from openai import AsyncOpenAI
-from dotenv import load_dotenv
+from config_manager import EncryptedConfigManager
 
 from search import aggregate_search_results, identify_subqueries_for_search_and_retrieval
-
-load_dotenv(override=True)
 
 from constants import BOOK_GENERATOR_V2
 from file_utils import generate_document,generate_download_link
 
-openai_api_key = os.environ["OPENAI_API_KEY"]
-claude_api_key = os.environ["CLAUDE_API_KEY"]
 
-openai_llm_async = AsyncOpenAI(api_key=openai_api_key)
-claude_llm_async = Anthropic(api_key=claude_api_key)
 
 
 async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.value):
@@ -40,7 +33,11 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
     except Exception as e:
         print("No query engine found")
         chunks = []
-    
+        
+    config_manager = EncryptedConfigManager(ENCRYPTED_KEYS_FILE_PATH, ENCRYPTION_KEY)
+
+    openai_llm_async = AsyncOpenAI(api_key=config_manager.get_key("OPENAI_API_KEY"))
+    claude_llm_async = Anthropic(api_key=config_manager.get_key("CLAUDE_API_KEY"))
 
     sorted_chunks = process_chunks(chunks,TOP_K)
     unique_sources = get_unique_sources(sorted_chunks)
@@ -67,7 +64,7 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
     try:
         if llm_provider == LLMProvider.OPENAI.value:
             finish_reason = ""
-            if not openai_api_key:
+            if not config_manager.get_key("OPENAI_API_KEY"):
                 placeholder.info("Sorry , openai api key is not set.")
                 return
             stream_coroutine  = openai_llm_async.chat.completions.create(
@@ -110,7 +107,7 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
                 
 
         elif llm_provider == LLMProvider.CLAUDE.value:
-            if not claude_api_key:
+            if not config_manager.get_key("CLAUDE_API_KEY"):
                 placeholder.info("Sorry , claude api key is not set.")
                 return
             with claude_llm_async.messages.stream(
