@@ -21,7 +21,12 @@ st.set_page_config(layout="wide")
 
 async def main():
 
-    load_keys()
+    if 'keys_loaded' not in st.session_state:
+        st.session_state.keys_loaded = False
+    
+    if not st.session_state.keys_loaded:
+        load_keys()
+        st.session_state.keys_loaded = True
 
     if 'all_documents' not in st.session_state:
         st.session_state.all_documents = {}

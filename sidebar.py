@@ -1,4 +1,6 @@
 import streamlit as st
+from config_manager import EncryptedConfigManager
+from constants import ENCRYPTED_KEYS_FILE_PATH, ENCRYPTION_KEY
 from query_engine import reset_collection
 
 def render_sidebar():
@@ -6,11 +8,17 @@ def render_sidebar():
         st.header("Input Section")
         
         # Button to open API key management dialog
-        open_dialog_button = st.button("Manage API Key", key="manage_api_key_button")
+        col1, col2 = st.columns(2)
+        with col1:
+            openai_dialog = st.button("Configure OpenAI Key", key="manage_openai_key_button")
+        with col2:
+            claude_dialog = st.button("Configure Claude Key", key="manage_claude_key_button")
         
-        # Conditional dialog for API key input
-        if open_dialog_button:
-            key_management()
+        # Conditional dialogs for API key input
+        if openai_dialog:
+            key_management("OPENAI")
+        if claude_dialog:
+            key_management("CLAUDE")
         
         uploaded_files = st.file_uploader("Upload File",
                                           accept_multiple_files=True,
@@ -44,14 +52,19 @@ def render_sidebar():
     return uploaded_files, textsplit, generate_button, download_button_placeholder
 
 @st.dialog("API Key Management")
-def key_management():
-    api_key = st.text_input("Enter your API Key", type="password", key="api_key") 
-    # Provide feedback on API key presence
-    if api_key:
-        st.success("API Key set!")
-    else:
-        st.warning("Please enter an API Key.")
+def key_management(provider):
+    config_manager = EncryptedConfigManager(ENCRYPTED_KEYS_FILE_PATH, ENCRYPTION_KEY)
+    existing_key = config_manager.get_key(f"{provider}_API_KEY")
 
-    if st.button("Submit"):
-    #    Processing the submission flow
-        st.rerun()      
+    
+    api_key = st.text_input(
+        f"Enter your {provider} API Key", 
+        type="password",
+        value=existing_key if existing_key else "",
+        key=f"{provider}_API_KEY"
+    )
+
+    if st.button("Save"):
+        if api_key:
+            config_manager.update_key(f"{provider}_API_KEY", api_key)
+            st.success(f"{provider} API Key saved successfully!")
