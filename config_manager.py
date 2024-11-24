@@ -24,6 +24,7 @@ class EncryptedConfigManager:
 
     def get_key(self, key_name):
         """Decrypt and return the value of the specified key."""
+        self.keys = self._load_keys()
         encrypted_value = self.keys.get(key_name)
         if encrypted_value:
             return self.fernet.decrypt(encrypted_value.encode()).decode()
@@ -33,7 +34,13 @@ class EncryptedConfigManager:
         """Encrypt and update the value of the specified key."""
         encrypted_value = self.fernet.encrypt(key_value.encode()).decode()
         self.keys[key_name] = encrypted_value
-        self._save_keys()
+
+        # Save the updated keys to the file
+        current_data = self._load_keys()
+        current_data[key_name] = encrypted_value
+        
+        with open(self.encrypted_file_path, 'w') as file:
+            json.dump(current_data, file, indent=4)
 
     def list_keys(self):
         """List all stored key names."""
