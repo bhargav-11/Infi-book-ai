@@ -2,7 +2,7 @@ import random
 import re
 import asyncio
 
-from constants import OPENAI_MODEL,CLAUDE_MODEL, TOP_K ,ENCRYPTED_KEYS_FILE_PATH,ENCRYPTION_KEY
+from constants import OPENAI_O1_MODELS, TOP_K ,ENCRYPTED_KEYS_FILE_PATH,ENCRYPTION_KEY
 from llm_provider import LLMProvider
 from anthropic import Anthropic
 import streamlit as st
@@ -63,18 +63,44 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
 
     try:
         if llm_provider == LLMProvider.OPENAI.value:
+            openai_config = st.session_state.openai_config
             finish_reason = ""
             if not config_manager.get_key("OPENAI_API_KEY"):
                 placeholder.info("Sorry , openai api key is not set.")
                 return
-            stream_coroutine  = openai_llm_async.chat.completions.create(
-                model=OPENAI_MODEL,
-                messages=[
+            
+            print(openai_config)
+
+            if openai_config["model"] in OPENAI_O1_MODELS:
+                
+                stream_coroutine  = openai_llm_async.chat.completions.create(
+                    model=openai_config["model"],
+                    messages=[
+                        {"role": "user", "content": system_message + prompt},
+                    ],
+                    stream=True,
+                    temperature=openai_config["temperature"],
+                    top_p=openai_config["top_p"],
+                    presence_penalty=openai_config["presence_penalty"],
+                    frequency_penalty=openai_config["frequency_penalty"]
+                )
+            else:
+                messages = [
                     {"role": "system", "content": system_message},
                     {"role": "user", "content": prompt},
-                ],
-                stream=True,
-            )
+                ]
+                stream_coroutine  = openai_llm_async.chat.completions.create(
+                    model=openai_config["model"],
+                    messages=messages,
+                    stream=True,
+                    temperature=openai_config["temperature"],
+                    max_tokens=openai_config["max_tokens"],
+                    top_p=openai_config["top_p"],
+                    presence_penalty=openai_config["presence_penalty"],
+                    frequency_penalty=openai_config["frequency_penalty"]
+                )
+
+            
             stream = await stream_coroutine
             
             async for chunk in stream:
@@ -85,16 +111,36 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
                     placeholder.info(streamed_text)
 
             if finish_reason == "length":
-                stream_coroutine  = openai_llm_async.chat.completions.create(
-                model=OPENAI_MODEL,
-                messages=[
-                    {"role": "system", "content": system_message},
-                    {"role": "user", "content": prompt},
-                    {"role":"assistant","content":streamed_text},
-                    {"role":"user", "content":"Continue "}
-                ],
-                stream=True,
-                )
+                if openai_config["model"] in OPENAI_O1_MODELS:
+                    stream_coroutine  = openai_llm_async.chat.completions.create(
+                        model=openai_config["model"],
+                        messages=[
+                            {"role":"user", "content":prompt},
+                            {"role":"assistant","content":streamed_text},
+                            {"role":"user", "content":"Continue "}
+                        ],
+                        stream=True,
+                        temperature=openai_config["temperature"],
+                        top_p=openai_config["top_p"],
+                        presence_penalty=openai_config["presence_penalty"],
+                        frequency_penalty=openai_config["frequency_penalty"]
+                    )
+                else:
+                    stream_coroutine  = openai_llm_async.chat.completions.create(
+                        model=openai_config["model"],
+                        messages=[
+                           {"role": "system", "content": system_message},
+                           {"role": "user", "content": prompt},
+                           {"role":"assistant","content":streamed_text},
+                           {"role":"user", "content":"Continue "}  
+                        ],
+                        stream=True,
+                        max_tokens=openai_config["max_tokens"],
+                        temperature=openai_config["temperature"],
+                        top_p=openai_config["top_p"],
+                        presence_penalty=openai_config["presence_penalty"],
+                        frequency_penalty=openai_config["frequency_penalty"]
+                    )
                 
                 stream = await stream_coroutine
 
@@ -107,16 +153,18 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
                 
 
         elif llm_provider == LLMProvider.CLAUDE.value:
+            claude_config = st.session_state.claude_config
+    
             if not config_manager.get_key("CLAUDE_API_KEY"):
                 placeholder.info("Sorry , claude api key is not set.")
                 return
             with claude_llm_async.messages.stream(
-                max_tokens=4096,
                 messages=[
                     {"role": "user", "content": system_message+prompt}
                 ],
-                model=CLAUDE_MODEL,
-                temperature=0.7
+                model=claude_config["model"],
+                temperature=claude_config["temperature"],
+                max_tokens=claude_config["max_tokens"],
             ) as stream:
                 for text in stream.text_stream:
                     streamed_text += text
