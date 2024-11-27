@@ -186,6 +186,29 @@ OPENAI_API_KEY= os.getenv('OPENAI_API_KEY')
 CLAUDE_API_KEY = os.getenv('CLAUDE_API_KEY')
 TAVILY_API_KEY = os.getenv('TAVILY_API_KEY')
 
+OPENAI_DEFAULT_SETTINGS = {
+     "model": "gpt-4o",
+      "temperature": 1.0,
+      "max_tokens": 4096,
+      "top_p": 1.0,
+      "presence_penalty": 0.0,
+      "frequency_penalty": 0.0
+}
+CLAUDE_DEFAULT_SETTINGS = {
+    "model": "claude-3-haiku-20240307",
+    "temperature": 1.0,
+    "max_tokens": 4096,
+}
+
+OPENAI_O1_MODELS = ["o1-preview", "o1-mini"]
+
+OPENAI_MODELS = ["gpt-4o", "gpt-4o-mini"] + OPENAI_O1_MODELS
+CLAUDE_MODELS = [
+    "claude-3-opus-20240229",
+    "claude-3-sonnet-20240229",
+    "claude-3-haiku-20240307"
+]
+
 # Performance Requirements: The requirements cover various aspects like color rendering, illumination, spatial frequency response, resolution, mechanical interface, safety measures, and noise levels.
 # |
 # Functional Requirements: The system should have functions like brightness, gamma, sharpness, color adjustment, white balance, screen freeze, image magnification, endoscopic mode switching, language selection, shortcut buttons, video/photo capture, data storage, reset, and soft lens interface.
