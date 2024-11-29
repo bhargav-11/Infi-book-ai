@@ -12,7 +12,7 @@ from file_extension import FileExtension
 from chat_utils import streamchat
 from pdfminer.high_level import extract_text
 from file_utils import extract_doc_text, extract_docx_text
-from query_engine import get_documents_from_text, get_query_engine_from_text, reset_collection
+from query_engine import get_documents_from_text, get_index_from_documents, reset_collection
 from load_keys import load_keys
 from sidebar import render_sidebar
 
@@ -39,6 +39,9 @@ async def main():
         st.session_state.openai_config = OPENAI_DEFAULT_SETTINGS
     if "claude_config" not in st.session_state:
         st.session_state.claude_config = CLAUDE_DEFAULT_SETTINGS
+
+    if "prompt_file_mapping" not in st.session_state:
+        st.session_state.prompt_file_mapping = {}
            
 
     st.title("Infi Book AI")
@@ -59,22 +62,23 @@ async def main():
             for uploaded_file in uploaded_files:
                 if uploaded_file.type == FileExtension.PDF.value:
                     text= extract_text(uploaded_file)
-                    documents_from_pdf = get_documents_from_text(text,uploaded_file.name,index)
+                    documents_from_pdf = get_documents_from_text(text,uploaded_file.name,uploaded_file.file_id,index)
                     documents.extend(documents_from_pdf) 
                     index+= len(documents_from_pdf)
                 elif uploaded_file.type == FileExtension.DOCX.value:
                     text= extract_docx_text(uploaded_file)
-                    documents_from_docx = get_documents_from_text(text,uploaded_file.name,index)
+                    documents_from_docx = get_documents_from_text(text,uploaded_file.name,uploaded_file.file_id,    index)
                     documents.extend(documents_from_docx)
                     index += len(documents_from_docx)
                 elif uploaded_file.type == FileExtension.DOC.value:
                     text=extract_doc_text(uploaded_file)
-                    documents_from_doc= get_documents_from_text(text,uploaded_file.name,index)
+                    documents_from_doc= get_documents_from_text(text,uploaded_file.name,uploaded_file.file_id,index)
                     documents.extend(documents_from_doc)
                     index+=len(documents_from_doc)
 
-            query_engine = get_query_engine_from_text(documents, top_k=7)
-            st.session_state.query_engine = query_engine
+
+            index = get_index_from_documents(documents, top_k=7)
+            st.session_state.index = index
         
         main_content.write("Generating documents...")
         await generate_documents(textsplit, main_content)
