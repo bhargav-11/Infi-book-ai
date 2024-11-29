@@ -36,10 +36,14 @@ def render_sidebar():
         uploaded_files = st.file_uploader("Upload File",
                                           accept_multiple_files=True,
                                           type=["pdf", "docx", "doc"],
-                                          key="general_agent")
+                                          key="uploaded_files")
         
         text_area = st.text_area("Provide sub chapters separated by |")
         textsplit = text_area.split("|") if text_area else []
+
+        prompt_config = st.button("💬 Sub chapters Configuration", key="manage_prompt_config_button")
+        if prompt_config:
+            prompt_config_management(textsplit)
 
         st.toggle(
             label="Search the Internet for information",
@@ -153,3 +157,51 @@ def claude_config_management():
             st.session_state.claude_config["max_tokens"] = max_tokens
             st.success("Claude configuration saved!")
 
+@st.dialog("Prompt Configuration")
+def prompt_config_management(textsplit):
+    if len(textsplit) == 0:
+        st.write("No sub chapters provided")
+        return
+    
+    if len(st.session_state.get('uploaded_files', [])) == 0:
+        st.write("No files uploaded")
+        return
+    
+    st.write("Configure each prompt with file selection")
+
+    # Create a dictionary of file_id to file_name for easier display
+    uploaded_files = st.session_state.get('uploaded_files', [])
+    file_options = {
+        file.file_id: file.name 
+        for file in uploaded_files
+    }
+
+    # Initialize prompt_file_mapping in session state if it doesn't exist
+    if 'prompt_file_mapping' not in st.session_state:
+        st.session_state.prompt_file_mapping = {}
+    
+    # Create a temporary dictionary to store selections
+    temp_mapping = {}
+
+    for i, split in enumerate(textsplit):
+        prompt = split.strip()
+        st.subheader(f"Configuration for: {prompt}")
+        
+        # Modified to select all files by default if no previous selection exists
+        default_selection = st.session_state.prompt_file_mapping.get(prompt, list(file_options.keys()))
+        selected_files = st.multiselect(
+            f"Select files for {prompt}",
+            options=list(file_options.keys()),
+            format_func=lambda x: file_options[x],
+            default=default_selection,
+            key=f"files_{i}"
+        )
+        
+        temp_mapping[prompt] = selected_files
+
+    if st.button("Save Configuration"):
+        # Only update session state when save is clicked
+        st.session_state.prompt_file_mapping = temp_mapping.copy()
+        st.success("Text split configuration saved!")
+        # st.write("Current mapping:")
+        # st.json(st.session_state.prompt_file_mapping)

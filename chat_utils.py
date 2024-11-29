@@ -3,7 +3,13 @@ import re
 import asyncio
 
 from constants import OPENAI_O1_MODELS, TOP_K ,ENCRYPTED_KEYS_FILE_PATH,ENCRYPTION_KEY
+from custom_query_engine import RAGStringQueryEngine
 from llm_provider import LLMProvider
+from llama_index.core.vector_stores import (
+    FilterOperator,
+    MetadataFilter,
+    MetadataFilters,
+)
 from anthropic import Anthropic
 import streamlit as st
 from openai import AsyncOpenAI
@@ -15,8 +21,6 @@ from constants import BOOK_GENERATOR_V2
 from file_utils import generate_document,generate_download_link
 
 
-
-
 async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.value):
     try:
         search_queries, retrieval_subqueries =await identify_subqueries_for_search_and_retrieval(query)
@@ -26,11 +30,37 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
         retrieval_subqueries = []
     
     try:
-        chunks = st.session_state.query_engine.query(query)
+        file_ids = st.session_state.prompt_file_mapping.get(query,[])
+        if file_ids:
+            filters = MetadataFilters(
+                filters=[
+                    MetadataFilter(
+                        key="file_id",
+                        value=file_ids,
+                        operator=FilterOperator.IN
+                    )
+                ]
+            )
+            retriever = st.session_state.index.as_retriever(similarity_top_k=TOP_K, filters=filters)
+        else:
+            print(f"No file ids found for the query so using all the files available for query : {query}")
+            retriever = st.session_state.index.as_retriever(similarity_top_k=TOP_K)
+
+        query_engine = RAGStringQueryEngine(
+        retriever=retriever
+        )
+        chunks = query_engine.query(query)
+        # print("Chunks :",chunks)
+        file_ids_list = []
+        for chunk in chunks:
+            file_ids_list.append(chunk.get("metadata").get("file_id"))
+
+        # print("File ids :",set(file_ids_list))
         if retrieval_subqueries:
             for subquery in retrieval_subqueries:
-                chunks.extend(st.session_state.query_engine.query(subquery))
+                chunks.extend(query_engine.query(subquery))
     except Exception as e:
+        print("Error in query engine :",e)
         print("No query engine found")
         chunks = []
         
@@ -46,7 +76,6 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
         search_queries_result = await aggregate_search_results(search_queries)
         search_results = "\n\n".join(f"Search Query: {result['query']}\nAnswer: {result['answer']}" for result in search_queries_result)
         prompt = BOOK_GENERATOR_V2.format( query=query,context=context_str,search_results=search_results)
-        
         source_links = get_random_source_links(search_queries_result)
     else:
          prompt = BOOK_GENERATOR_V2.format( query=query,context=context_str,search_results="None")
@@ -69,8 +98,6 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
                 placeholder.info("Sorry , openai api key is not set.")
                 return
             
-            print(openai_config)
-
             if openai_config["model"] in OPENAI_O1_MODELS:
                 
                 stream_coroutine  = openai_llm_async.chat.completions.create(
