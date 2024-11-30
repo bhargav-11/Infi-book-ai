@@ -188,7 +188,7 @@ def prompt_config_management(textsplit):
         st.subheader(f"Configuration for: {prompt}")
         
         # Modified to select all files by default if no previous selection exists
-        default_selection = st.session_state.prompt_file_mapping.get(prompt, list(file_options.keys()))
+        default_selection = st.session_state.prompt_file_mapping.get(prompt, [])
         selected_files = st.multiselect(
             f"Select files for {prompt}",
             options=list(file_options.keys()),
