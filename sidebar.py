@@ -188,7 +188,7 @@ def prompt_config_management(textsplit):
         st.subheader(f"Configuration for: {prompt}")
         
         # Modified to select all files by default if no previous selection exists
-        default_selection = st.session_state.prompt_file_mapping.get(prompt, [])
+        default_selection = st.session_state.prompt_file_mapping.get(i, [])
         selected_files = st.multiselect(
             f"Select files for {prompt}",
             options=list(file_options.keys()),
@@ -197,8 +197,8 @@ def prompt_config_management(textsplit):
             key=f"files_{i}"
         )
         
-        temp_mapping[prompt] = selected_files
-
+        temp_mapping[i] = selected_files
+    
     if st.button("Save Configuration"):
         # Only update session state when save is clicked
         st.session_state.prompt_file_mapping = temp_mapping.copy()
