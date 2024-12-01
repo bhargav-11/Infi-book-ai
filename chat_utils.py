@@ -30,7 +30,8 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
         retrieval_subqueries = []
     
     try:
-        file_ids = st.session_state.prompt_file_mapping.get(query,[])
+        # index is 1 based index so we are subtracting 1
+        file_ids = st.session_state.prompt_file_mapping.get(index-1,[])
         if file_ids:
             filters = MetadataFilters(
                 filters=[
@@ -42,6 +43,7 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
                 ]
             )
             retriever = st.session_state.index.as_retriever(similarity_top_k=TOP_K, filters=filters)
+            print("Retriever :",retriever)
         else:
             print(f"No file ids found for the query so using all the files available for query : {query}")
             retriever = st.session_state.index.as_retriever(similarity_top_k=TOP_K)
@@ -67,6 +69,7 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
     config_manager = EncryptedConfigManager(ENCRYPTED_KEYS_FILE_PATH, ENCRYPTION_KEY)
 
     openai_llm_async = AsyncOpenAI(api_key=config_manager.get_key("OPENAI_API_KEY"))
+
     claude_llm_async = Anthropic(api_key=config_manager.get_key("CLAUDE_API_KEY"))
 
     sorted_chunks = process_chunks(chunks,TOP_K)
