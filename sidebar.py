@@ -38,6 +38,20 @@ def render_sidebar():
                                           type=["pdf", "docx", "doc"],
                                           key="uploaded_files")
         
+        if uploaded_files:
+
+            # Removing ids in the prompt file mapping for subchapter configuration
+            current_file_ids = {file.file_id for file in uploaded_files}
+            if 'prompt_file_mapping' in st.session_state:
+                for key in list(st.session_state.prompt_file_mapping.keys()):
+                    # Filter out file IDs that are no longer in the uploaded files
+                    st.session_state.prompt_file_mapping[key] = [
+                        file_id for file_id in st.session_state.prompt_file_mapping[key] 
+                        if file_id in current_file_ids
+                    ]
+
+            print("After:",st.session_state.prompt_file_mapping)
+        
         text_area = st.text_area("Provide sub chapters separated by |")
         textsplit = text_area.split("|") if text_area else []
 
@@ -202,6 +216,6 @@ def prompt_config_management(textsplit):
     if st.button("Save Configuration"):
         # Only update session state when save is clicked
         st.session_state.prompt_file_mapping = temp_mapping.copy()
-        st.success("Text split configuration saved!")
+        st.success("Subchapters configuration saved!")
         # st.write("Current mapping:")
         # st.json(st.session_state.prompt_file_mapping)
