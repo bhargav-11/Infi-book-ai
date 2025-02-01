@@ -1,7 +1,7 @@
 import time
 import streamlit as st
 from config_manager import EncryptedConfigManager
-from constants import ENCRYPTED_KEYS_FILE_PATH, ENCRYPTION_KEY ,OPENAI_DEFAULT_SETTINGS, CLAUDE_DEFAULT_SETTINGS, OPENAI_MODELS, CLAUDE_MODELS
+from constants import ENCRYPTED_KEYS_FILE_PATH, ENCRYPTION_KEY, GEMINI_DEFAULT_SETTINGS, GEMINI_MODELS ,OPENAI_DEFAULT_SETTINGS, CLAUDE_DEFAULT_SETTINGS, OPENAI_MODELS, CLAUDE_MODELS
 from query_engine import reset_collection
 
 def render_sidebar():
@@ -9,28 +9,38 @@ def render_sidebar():
         st.header("Input Section")
         
         # Button to open API key management dialog
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         with col1:
             openai_dialog = st.button("🔑 OpenAI Key", key="manage_openai_key_button")
         with col2:
             claude_dialog = st.button("🔐 Claude Key", key="manage_claude_key_button")
+        with col3:
+            gemini_dialog = st.button("🗝️ Gemini Key", key="manage_gemini_key_button")
+        
         
         # Conditional dialogs for API key input
         if openai_dialog:
             key_management("OPENAI")
         if claude_dialog:
             key_management("CLAUDE")
+        if gemini_dialog:
+            key_management("GEMINI")
         
-        col3, col4 = st.columns(2)
-        with col3:
-            openai_config = st.button("⚙️ OpenAI Settings", key="manage_openai_config_button")
+        col4, col5 , col6 = st.columns(3)
         with col4:
+            openai_config = st.button("⚙️ OpenAI Settings", key="manage_openai_config_button")
+        with col5:
             claude_config = st.button("🛠️ Claude Settings", key="manage_claude_config_button")
+        with col6:
+            gemini_config = st.button("🔧 Gemini Settings", key="manage_gemini_config_button")
         
         if openai_config:
             openai_config_management()
         if claude_config:
             claude_config_management()
+        
+        if gemini_config:
+            gemini_config_management()
 
 
         uploaded_files = st.file_uploader("Upload File",
@@ -66,7 +76,7 @@ def render_sidebar():
 
         st.selectbox(
             label="Choose LLM provider",
-            options=("OPENAI", "CLAUDE"),
+            options=("OPENAI", "CLAUDE","GEMINI"),
             key="llm_provider"
         )
         
@@ -170,6 +180,28 @@ def claude_config_management():
             st.session_state.claude_config["temperature"] = temperature
             st.session_state.claude_config["max_tokens"] = max_tokens
             st.success("Claude configuration saved!")
+
+@st.dialog("Gemini Configuration")
+def gemini_config_management():
+    st.write("Gemini Model Configuration")
+
+    selected_model = st.selectbox(
+        "Select Gemini Model",
+        options=GEMINI_MODELS,
+        index=GEMINI_MODELS.index(st.session_state.gemini_config["model"])
+    )
+    
+    col1,col2 = st.columns([1,1])
+    with col1:
+        if st.button("Reset",use_container_width=True):
+            st.session_state.gemini_config.update(GEMINI_DEFAULT_SETTINGS)
+            st.success("Gemini settings reset to default values")
+            time.sleep(2)
+            st.rerun()
+    with col2:
+        if st.button("Save",use_container_width=True):
+            st.session_state.gemini_config["model"] = selected_model
+            st.success("Gemini configuration saved!")
 
 @st.dialog("Prompt Configuration")
 def prompt_config_management(textsplit):

@@ -7,7 +7,7 @@ import io
 import streamlit as st
 from dotenv import load_dotenv
 import asyncio
-from constants import CLAUDE_DEFAULT_SETTINGS, OPENAI_DEFAULT_SETTINGS
+from constants import CLAUDE_DEFAULT_SETTINGS, GEMINI_DEFAULT_SETTINGS, OPENAI_DEFAULT_SETTINGS
 from file_extension import FileExtension
 from chat_utils import streamchat
 from pdfminer.high_level import extract_text
@@ -39,6 +39,8 @@ async def main():
         st.session_state.openai_config = OPENAI_DEFAULT_SETTINGS
     if "claude_config" not in st.session_state:
         st.session_state.claude_config = CLAUDE_DEFAULT_SETTINGS
+    if "gemini_config" not in st.session_state:
+        st.session_state.gemini_config = GEMINI_DEFAULT_SETTINGS
 
     if "prompt_file_mapping" not in st.session_state:
         st.session_state.prompt_file_mapping = {}

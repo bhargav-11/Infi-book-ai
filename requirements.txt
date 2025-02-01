@@ -8,6 +8,7 @@ python-docx
 markdown
 markdown2==2.4.13
 numpy==1.26.4
+google-generativeai==0.8.4
 htmldocx
 llama-index==0.10.44
 llama-index-core==0.10.44

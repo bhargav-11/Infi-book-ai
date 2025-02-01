@@ -2,6 +2,7 @@ import random
 import re
 import asyncio
 
+from chat_template import get_chat_template, load_chat_styles
 from constants import OPENAI_O1_MODELS, TOP_K ,ENCRYPTED_KEYS_FILE_PATH,ENCRYPTION_KEY
 from custom_query_engine import RAGStringQueryEngine
 from llm_provider import LLMProvider
@@ -11,6 +12,7 @@ from llama_index.core.vector_stores import (
     MetadataFilters,
 )
 from anthropic import Anthropic
+import google.generativeai as genai
 import streamlit as st
 from openai import AsyncOpenAI
 from config_manager import EncryptedConfigManager
@@ -71,6 +73,8 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
     openai_llm_async = AsyncOpenAI(api_key=config_manager.get_key("OPENAI_API_KEY"))
 
     claude_llm_async = Anthropic(api_key=config_manager.get_key("CLAUDE_API_KEY"))
+
+    genai.configure(api_key=config_manager.get_key("GEMINI_API_KEY"))
 
     sorted_chunks = process_chunks(chunks,TOP_K)
     unique_sources = get_unique_sources(sorted_chunks)
@@ -200,6 +204,23 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
                     streamed_text += text
                     placeholder.info(streamed_text)
                     await asyncio.sleep(0)
+        
+        elif llm_provider == LLMProvider.GEMINI.value:
+            gemini_config = st.session_state.gemini_config
+            if not config_manager.get_key("GEMINI_API_KEY"):
+                placeholder.info("Sorry , gemini api key is not set.")
+                return
+            gemini_model = genai.GenerativeModel(gemini_config["model"])
+
+            full_prompt = system_message + prompt
+            response = gemini_model.generate_content(full_prompt, stream=True)
+            streamed_text = ""
+            for chunk in response:
+                if chunk.text:
+                    streamed_text += chunk.text
+                    placeholder.info(streamed_text)  
+                    await asyncio.sleep(0)
+            
         else:
             placeholder.info("Invalid model choice. Please choose 'openai' or 'claude'.")
     except Exception as e:
@@ -288,29 +309,36 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
         }
         </style>
         """, unsafe_allow_html=True)
+    
+    # Generate source chips HTML
+    source_chips = ''.join([
+        f'<span class="source-chip">{source}</span>' 
+        for source in unique_sources if source
+    ]) or '<span class="no-sources">No document sources available</span>'
+    
+    source_link_chips = ''.join([
+        f'<span class="source-chip"><a href="{source}" target="_blank">Link {i+1}</a></span>'
+        for i, source in enumerate(source_links) if source
+    ]) or '<span class="no-sources">No source/url links available</span>'
 
-    placeholder.markdown(
-        f'''
-         <div class="chat-container">
-            <div class="chat-index">#{index}</div>
-            <div class="chat-content">
-            <h2>{title} </h2>
-                {streamed_text_without_title}
-                <br><br>
-                <div class="download-link-container">
-                    {download_link}
-                </div>
-                <div class="source-list">
-                    {''.join([f'<span class="source-chip">{source}</span>' for source in unique_sources if source]) or '<span class="no-sources">No document sources available</span>'}
-                </div>
-                <div class="source-list">
-                    {''.join([f'<span class="source-chip"><a href="{source}" target="_blank">Link {i+1}</a></span>' for i, source in enumerate(source_links) if source]) or '<span class="no-sources">No source/url links available</span>'}
-                </div>
-            </div>
-        </div>
-        ''',
-        unsafe_allow_html=True
+    print("Source chips :",source_chips)
+    print("Source links :",source_link_chips)
+    print("Download link :",download_link)
+    print("Streamed text :",streamed_text_without_title)
+    print("Title :",title)
+
+
+    chat_html = get_chat_template().format(
+        index=index,
+        title=title,
+        content=streamed_text_without_title,
+        download_link=download_link,
+        sources=source_chips,
+        source_links=source_link_chips
     )
+    
+    placeholder.markdown(chat_html, unsafe_allow_html=True)
+
 
 def extract_title(text):
     # Try to find a line starting with ## or #
@@ -318,15 +346,15 @@ def extract_title(text):
     if match:
         title = match.group(2).strip()
         text = re.sub(r'^\s*##?\s*.+\n?', '', text, count=1, flags=re.MULTILINE)
-        return title, text
+        return title, text.strip('\n')  # strip('\n') only removes newlines at start/end
 
     # If no match found, try to find the first non-empty line
     lines = text.split('\n')
     for i, line in enumerate(lines):
         if line.strip():
-            return line.strip(), '\n'.join(lines[i+1:])
+            return line.strip(), '\n'.join(lines[i+1:]).strip('\n')
 
-    return None, text
+    return None, text.strip('\n')
 
 def get_unique_sources(chunks):
     unique_filenames = set()

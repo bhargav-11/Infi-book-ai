@@ -184,6 +184,7 @@ ENCRYPTED_KEYS_FILE_PATH = 'api_keys.json'
 ENCRYPTION_KEY = os.getenv('ENCRYPTION_KEY')
 OPENAI_API_KEY= os.getenv('OPENAI_API_KEY')
 CLAUDE_API_KEY = os.getenv('CLAUDE_API_KEY')
+GEMINI_API_KEY = os.getenv('GEMINI_API_KEY')
 TAVILY_API_KEY = os.getenv('TAVILY_API_KEY')
 
 OPENAI_DEFAULT_SETTINGS = {
@@ -200,6 +201,10 @@ CLAUDE_DEFAULT_SETTINGS = {
     "max_tokens": 4096,
 }
 
+GEMINI_DEFAULT_SETTINGS = {
+    "model": "gemini-1.5-flash",
+}
+
 OPENAI_O1_MODELS = ["o1-preview", "o1-mini"]
 
 OPENAI_MODELS = ["gpt-4o", "gpt-4o-mini"] + OPENAI_O1_MODELS
@@ -207,6 +212,11 @@ CLAUDE_MODELS = [
     "claude-3-opus-20240229",
     "claude-3-sonnet-20240229",
     "claude-3-haiku-20240307"
+]
+GEMINI_MODELS = [
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-8b",
+    "gemini-1.5-pro"
 ]
 
 # Performance Requirements: The requirements cover various aspects like color rendering, illumination, spatial frequency response, resolution, mechanical interface, safety measures, and noise levels.
