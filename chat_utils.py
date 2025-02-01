@@ -321,12 +321,6 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
         for i, source in enumerate(source_links) if source
     ]) or '<span class="no-sources">No source/url links available</span>'
 
-    print("Source chips :",source_chips)
-    print("Source links :",source_link_chips)
-    print("Download link :",download_link)
-    print("Streamed text :",streamed_text_without_title)
-    print("Title :",title)
-
 
     chat_html = get_chat_template().format(
         index=index,
