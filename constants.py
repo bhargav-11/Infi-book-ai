@@ -218,6 +218,24 @@ GEMINI_MODELS = [
     "gemini-1.5-flash-8b",
     "gemini-1.5-pro"
 ]
+INPUT_TOKENS_LIMIT = {
+    "OPENAI": {
+        "gpt-4o": 128000,
+        "gpt-4o-mini": 64000,
+        "o1-preview": 16384,
+        "o1-mini": 16384
+    },
+    "CLAUDE": {
+        "claude-3-opus-20240229": 200000,
+        "claude-3-sonnet-20240229": 200000,
+        "claude-3-haiku-20240307": 200000
+    },    
+    "GEMINI": {
+        "gemini-1.5-flash": 1048576,
+        "gemini-1.5-flash-8b": 1048576,
+        "gemini-1.5-pro": 1048576
+    }
+}
 
 # Performance Requirements: The requirements cover various aspects like color rendering, illumination, spatial frequency response, resolution, mechanical interface, safety measures, and noise levels.
 # |

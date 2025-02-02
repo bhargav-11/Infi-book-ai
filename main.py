@@ -12,7 +12,7 @@ from file_extension import FileExtension
 from chat_utils import streamchat
 from pdfminer.high_level import extract_text
 from file_utils import extract_doc_text, extract_docx_text
-from query_engine import get_documents_from_text, get_index_from_documents, reset_collection
+from query_engine import get_documents_from_text, reset_collection
 from load_keys import load_keys
 from sidebar import render_sidebar
 
@@ -44,6 +44,15 @@ async def main():
 
     if "prompt_file_mapping" not in st.session_state:
         st.session_state.prompt_file_mapping = {}
+    
+    if "documents" not in st.session_state:
+        st.session_state.documents = {}
+
+    if "file_tokens_count" not in st.session_state:
+        st.session_state.file_tokens_count = {}
+    
+    if "token_warnings" not in st.session_state:
+        st.session_state.token_warnings = {}
            
 
     st.title("Infi Book AI")
@@ -54,6 +63,8 @@ async def main():
     # Main area for content
     main_content = st.empty()
     if generate_button:
+        # Reset warnings 
+        st.session_state.token_warnings = {}
         if uploaded_files:
             reset_collection()
             
@@ -64,23 +75,30 @@ async def main():
             for uploaded_file in uploaded_files:
                 if uploaded_file.type == FileExtension.PDF.value:
                     text= extract_text(uploaded_file)
-                    documents_from_pdf = get_documents_from_text(text,uploaded_file.name,uploaded_file.file_id,index)
+                    documents_from_pdf,total_tokens_from_pdf = get_documents_from_text(text,uploaded_file.name,uploaded_file.file_id,index)
+                    st.session_state.documents[uploaded_file.file_id] = documents_from_pdf
+                    st.session_state.file_tokens_count[uploaded_file.file_id] = total_tokens_from_pdf
                     documents.extend(documents_from_pdf) 
                     index+= len(documents_from_pdf)
                 elif uploaded_file.type == FileExtension.DOCX.value:
                     text= extract_docx_text(uploaded_file)
-                    documents_from_docx = get_documents_from_text(text,uploaded_file.name,uploaded_file.file_id,    index)
+                    documents_from_docx,total_tokens_from_docx = get_documents_from_text(text,uploaded_file.name,uploaded_file.file_id,index)
+                    st.session_state.documents[uploaded_file.file_id] = documents_from_docx
+                    st.session_state.file_tokens_count[uploaded_file.file_id] = total_tokens_from_docx
                     documents.extend(documents_from_docx)
                     index += len(documents_from_docx)
                 elif uploaded_file.type == FileExtension.DOC.value:
                     text=extract_doc_text(uploaded_file)
-                    documents_from_doc= get_documents_from_text(text,uploaded_file.name,uploaded_file.file_id,index)
+                    documents_from_doc,total_tokens_from_doc= get_documents_from_text(text,uploaded_file.name,uploaded_file.file_id,index)
+                    st.session_state.documents[uploaded_file.file_id] = documents_from_doc
+                    st.session_state.file_tokens_count[uploaded_file.file_id] = total_tokens_from_doc
+
                     documents.extend(documents_from_doc)
                     index+=len(documents_from_doc)
 
 
-            index = get_index_from_documents(documents, top_k=7)
-            st.session_state.index = index
+            # index = get_index_from_documents(documents, top_k=7)
+            # st.session_state.index = index
         
         main_content.write("Generating documents...")
         await generate_documents(textsplit, main_content)
