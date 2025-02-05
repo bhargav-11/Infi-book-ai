@@ -61,7 +61,7 @@ async def streamchat(placeholder,query,index,llm_provider=LLMProvider.OPENAI.val
     if total_tokens > current_model_token_limit:
         st.session_state.token_warnings[query] = file_ids
         file_names = ", ".join(unique_sources)
-        placeholder.warning(f"Total tokens ({total_tokens}) exceed the limit ({current_model_token_limit}). Please reduce the number of documents or the size of the input text. \nFiles selected: {file_names}. \ Sub chapters: {query}")
+        placeholder.warning(f"Total tokens ({total_tokens}) exceed the limit ({current_model_token_limit}). Please reduce the number of documents or the size of the input text. \nFiles selected: {file_names}. \n Sub chapters: {query}")
         return
 
     # If search queries are available, aggregate the search results
