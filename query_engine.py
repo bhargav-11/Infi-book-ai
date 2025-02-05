@@ -1,5 +1,5 @@
 import time
-
+import tiktoken
 import chromadb
 from llama_index.core import StorageContext,VectorStoreIndex,ServiceContext,Document
 
@@ -18,8 +18,8 @@ chroma_collection = chroma_client.get_or_create_collection("chatbot-3")
 def get_documents_from_text(text,filename,file_id,start_index):
     text_splitter = TokenTextSplitter(chunk_size=600)
     chunks=text_splitter.split_text(text)
-    documents = generate_documents_from_chunks(chunks,filename,file_id,start_index)
-    return documents
+    documents,total_tokens = generate_documents_from_chunks(chunks,filename,file_id,start_index)
+    return documents,total_tokens
 
 
 def get_index_from_documents(documents, top_k=TOP_K):
@@ -52,17 +52,35 @@ def get_index_from_documents(documents, top_k=TOP_K):
     return index
 
 
+def count_tokens(text):
+    # Taking gpt-4o as the model for tokenization
+    # As support for gemini and claude is not available
+    encoding = tiktoken.encoding_for_model("gpt-4o")
+    num_tokens = len(encoding.encode(text))
+    return num_tokens
+    
+
+
 def generate_documents_from_chunks(chunks,filename,file_id,start_index=1):
     documents = []
+    total_tokens=0
     for idx,txt in enumerate(chunks,start=start_index):
+        tokens = count_tokens(txt)
         document = Document(
             doc_id = idx,
             text = txt,
-            metadata={"filename": f"{filename}","id":f"{filename}-{idx}" , "file_id":file_id},
+            metadata={
+                "filename": f"{filename}",
+                "id":f"{filename}-{idx}" , 
+                "file_id":file_id,
+                "tokens": tokens
+                },
+                
         )
         documents.append(document)
+        total_tokens+=tokens
     
-    return documents
+    return documents,total_tokens
 
 
 def get_all_ids():
