@@ -91,13 +91,6 @@ def render_sidebar():
 
         download_button_placeholder = st.empty()
     
-        if "token_warnings" in st.session_state and st.session_state.token_warnings:
-            st.warning("⚠️ Some prompts with selected files exceed the token limit. Please adjust the configuration.")
-            
-            for prompt, file_ids in st.session_state.token_warnings.items():
-                file_names = [file.name for file in uploaded_files if file.file_id in file_ids]
-                st.write(f"Sub chapters: '{prompt}'\n exceeds token limit with files: {', '.join(file_names)}")
-
     return uploaded_files, textsplit, generate_button, download_button_placeholder
 
 @st.dialog("API Key Management")
